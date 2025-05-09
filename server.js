@@ -7,6 +7,33 @@ const compression = require('compression');
 const serveStatic = require('serve-static');
 require('dotenv').config();
 
+// Initialize database connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
+  connectionTimeoutMillis: 2000, // How long to wait for a connection
+});
+
+// Test database connection
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error connecting to the database:', err);
+  } else {
+    console.log('Successfully connected to the database');
+    // Test the rectores table
+    client.query('SELECT COUNT(*) FROM rectores', (err, result) => {
+      if (err) {
+        console.error('Error querying rectores table:', err);
+      } else {
+        console.log('Number of records in rectores table:', result.rows[0].count);
+      }
+      release();
+    });
+  }
+});
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -98,100 +125,54 @@ const getMimeType = (filename) => {
   return mimeTypes[ext] || 'application/octet-stream';
 };
 
-// Serve static files for each app with detailed logging
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
-  // Handle %PUBLIC_URL% in paths
-  const requestPath = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving docentes file:', requestPath);
-  
-  // Try build directory first
-  const buildPath = path.join(__dirname, 'form-docentes/build', requestPath);
-  if (fs.existsSync(buildPath)) {
-    console.log('Serving from build:', buildPath);
-    res.setHeader('Content-Type', getMimeType(buildPath));
-    res.sendFile(buildPath);
-    return;
-  }
-  
-  // Try public directory next
-  const publicPath = path.join(__dirname, 'form-docentes/public', requestPath);
-  if (fs.existsSync(publicPath)) {
-    console.log('Serving from public:', publicPath);
-    res.setHeader('Content-Type', getMimeType(publicPath));
-    res.sendFile(publicPath);
-    return;
-  }
-  
-  // If file not found, try serving index.html for client-side routing
-  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
-    console.log('Serving index.html for path:', requestPath);
-    res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
-    return;
-  }
-  
-  next();
-});
+// Serve static files for each app
+const serveApp = (basePath, buildDir) => {
+  // Serve static files
+  app.use(basePath, express.static(path.join(__dirname, buildDir), {
+    setHeaders: (res, filePath) => {
+      const contentType = getMimeType(filePath);
+      res.setHeader('Content-Type', contentType);
+      console.log(`Serving ${filePath} with content type ${contentType}`);
+    }
+  }));
 
-// Serve static files for acudientes
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
-  const requestPath = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving acudientes file:', requestPath);
-  
-  const buildPath = path.join(__dirname, 'form-acudientes/build', requestPath);
-  if (fs.existsSync(buildPath)) {
-    res.setHeader('Content-Type', getMimeType(buildPath));
-    res.sendFile(buildPath);
-    return;
-  }
-  
-  const publicPath = path.join(__dirname, 'form-acudientes/public', requestPath);
-  if (fs.existsSync(publicPath)) {
-    res.setHeader('Content-Type', getMimeType(publicPath));
-    res.sendFile(publicPath);
-    return;
-  }
-  
-  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
-    res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
-    return;
-  }
-  
-  next();
-});
+  // Handle client-side routing
+  app.get(`${basePath}/*`, (req, res) => {
+    const indexPath = path.join(__dirname, buildDir, 'index.html');
+    console.log(`Serving index.html from ${indexPath}`);
+    res.sendFile(indexPath);
+  });
+};
 
-// Serve static files for estudiantes
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
-  const requestPath = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving estudiantes file:', requestPath);
-  
-  const buildPath = path.join(__dirname, 'form-estudiantes/build', requestPath);
-  if (fs.existsSync(buildPath)) {
-    res.setHeader('Content-Type', getMimeType(buildPath));
-    res.sendFile(buildPath);
-    return;
-  }
-  
-  const publicPath = path.join(__dirname, 'form-estudiantes/public', requestPath);
-  if (fs.existsSync(publicPath)) {
-    res.setHeader('Content-Type', getMimeType(publicPath));
-    res.sendFile(publicPath);
-    return;
-  }
-  
-  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
-    res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
-    return;
-  }
-  
-  next();
-});
-
-// Debug middleware
+// Debug middleware - add this before the app routes
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   console.log('Headers:', req.headers);
   next();
 });
+
+// Serve each application
+serveApp('/docentes/cosmo-doc-o185zfu2c-5xotms', 'form-docentes/build');
+serveApp('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', 'form-acudientes/build');
+serveApp('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', 'form-estudiantes/build');
+
+// Serve static files from public directory
+app.use('/static', express.static(path.join(__dirname, 'form-docentes/build/static'), {
+  setHeaders: (res, filePath) => {
+    const contentType = getMimeType(filePath);
+    res.setHeader('Content-Type', contentType);
+    console.log(`Serving static file ${filePath} with content type ${contentType}`);
+  }
+}));
+
+// Serve images
+app.use('/images', express.static(path.join(__dirname, 'form-docentes/build'), {
+  setHeaders: (res, filePath) => {
+    const contentType = getMimeType(filePath);
+    res.setHeader('Content-Type', contentType);
+    console.log(`Serving image ${filePath} with content type ${contentType}`);
+  }
+}));
 
 // Serve images directly with error handling
 app.get('/rectores.jpeg', (req, res) => {
@@ -262,6 +243,24 @@ app.get('/:token', (req, res) => {
   }
   
   safeServeStaticFile(appPath, null, 'text/html', res);
+});
+
+// Serve COSMO logo
+app.get('/images/LogoCosmo.png', (req, res) => {
+  const filePath = path.join(__dirname, 'Stats/frontend/public/images/LogoCosmo.png');
+  console.log('Serving LogoCosmo.png from:', filePath);
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'image/png');
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error('Error sending LogoCosmo.png:', err);
+        res.status(500).send('Error serving image');
+      }
+    });
+  } else {
+    console.error('LogoCosmo.png not found at:', filePath);
+    res.status(404).send('Image not found');
+  }
 });
 
 // Welcome page (root route)
@@ -345,6 +344,81 @@ app.get('/', (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+// API endpoint for searching schools
+app.get('/api/search-schools', handleSchoolSearch);
+app.post('/api/search-schools', handleSchoolSearch);
+
+// School search handler function
+async function handleSchoolSearch(req, res) {
+  try {
+    const query = req.method === 'GET' ? req.query.q : req.body.q;
+    console.log('Received search request with query:', query);
+    
+    if (!query) {
+      console.log('No query provided, returning empty array');
+      return res.json([]);
+    }
+
+    // First check if the table exists
+    console.log('Checking if rectores table exists...');
+    const tableCheck = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'rectores')"
+    );
+
+    if (!tableCheck.rows[0].exists) {
+      console.error('Table rectores does not exist');
+      return res.status(500).json({ 
+        error: 'Database configuration error',
+        details: 'The rectores table does not exist'
+      });
+    }
+
+    // Check if the column exists
+    console.log('Checking if nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ column exists...');
+    const columnCheck = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'rectores' AND column_name = 'nombre_de_la_institucion_educativa_en_la_actualmente_desempena_')"
+    );
+
+    if (!columnCheck.rows[0].exists) {
+      console.error('Column nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ does not exist in rectores table');
+      return res.status(500).json({ 
+        error: 'Database configuration error',
+        details: 'The nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ column does not exist in the rectores table'
+      });
+    }
+
+    // Query the rectores table for matching schools
+    console.log('Executing search query with:', query);
+    const result = await pool.query(
+      'SELECT DISTINCT nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ FROM rectores WHERE LOWER(nombre_de_la_institucion_educativa_en_la_actualmente_desempena_) LIKE LOWER($1) ORDER BY nombre_de_la_institucion_educativa_en_la_actualmente_desempena_',
+      [`%${query}%`]
+    );
+
+    console.log('Query result:', result.rows);
+
+    // Extract school names from the result
+    const schools = result.rows.map(row => row.nombre_de_la_institucion_educativa_en_la_actualmente_desempena_);
+    console.log('Returning schools:', schools);
+    res.json(schools);
+  } catch (error) {
+    console.error('Detailed error in search-schools:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      detail: error.detail,
+      hint: error.hint,
+      position: error.position,
+      where: error.where
+    });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message,
+      code: error.code,
+      hint: error.hint
+    });
+  }
+}
 
 // Error handling middleware
 app.use((err, req, res, next) => {
