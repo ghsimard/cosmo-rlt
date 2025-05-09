@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const mime = require('mime');
 const { Pool } = require('pg');
 const cors = require('cors');
 require('dotenv').config();
@@ -10,22 +9,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:*',
-    'https://*.onrender.com',
-    'https://cosmorlt.onrender.com',
-    'https://cosmorlt.onrender.com/docentes/*',
-    'https://cosmorlt.onrender.com/acudientes/*',
-    'https://cosmorlt.onrender.com/estudiantes/*'
-  ],
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Accept']
-}));
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Security headers
+// Security headers for production
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     // Security headers
@@ -33,31 +21,7 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    res.setHeader('Content-Security-Policy', 
-      "default-src 'self'; " +
-      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/* https://cosmorlt.onrender.com/api/*; " +
-      "img-src 'self' data: https:; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "font-src 'self' data:; " +
-      "frame-ancestors 'none'; " +
-      "object-src 'none';"
-    );
-    next();
-  });
-} else {
-  // More permissive CSP for development
-  app.use((req, res, next) => {
-    res.setHeader('Content-Security-Policy', 
-      "default-src 'self' http://localhost:*; " +
-      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/* https://cosmorlt.onrender.com/api/*; " +
-      "img-src 'self' data: https:; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "font-src 'self' data:; " +
-      "frame-ancestors 'none'; " +
-      "object-src 'none';"
-    );
+    res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
     next();
   });
 }
@@ -72,6 +36,14 @@ app.get('/test', (req, res) => {
   });
 });
 
+// Serve static files for each form application
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
+
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Debug middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -79,95 +51,136 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files for each form application
-const serveStaticWithMime = (basePath, directory) => {
+// Catch-all for client-side routing in React apps
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+  console.log('Serving docentes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
+});
+
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+  console.log('Serving acudientes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
+});
+
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+  console.log('Serving estudiantes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
+});
+
+// Configure PostgreSQL connection (if DATABASE_URL is provided)
+let pool;
+const useMockData = !process.env.DATABASE_URL;
+
+if (process.env.DATABASE_URL) {
+  console.log('DATABASE_URL is set. Attempting to connect to database...');
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+  
+  // Test database connection
+  pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+      console.error('Database connection error:', err.stack);
+    } else {
+      console.log('Database connected successfully');
+    }
+  });
+} else {
+  console.log('DATABASE_URL not set. Using mock data for all operations.');
+}
+
+// Access tokens - simplified to avoid special characters
+const ACCESS_TOKENS = {
+  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
+  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
+  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
+};
+
+// MIME type helper
+const getMimeType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.pdf': 'application/pdf',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.otf': 'font/otf'
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
+};
+
+// Token validation middleware
+const validateToken = (app) => {
   return (req, res, next) => {
-    const filePath = path.join(__dirname, directory, req.path);
-    console.log('Serving static file:', filePath);
+    const pathParts = req.path.split('/');
+    if (pathParts.length < 2) return res.status(403).send('Access Denied');
     
-    // Check if file exists
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        console.log('File not found:', filePath);
-        return next();
-      }
-
-      // Set appropriate MIME type
-      const ext = path.extname(filePath).toLowerCase();
-      switch (ext) {
-        case '.js':
-          res.setHeader('Content-Type', 'application/javascript');
-          break;
-        case '.css':
-          res.setHeader('Content-Type', 'text/css');
-          break;
-        case '.html':
-          res.setHeader('Content-Type', 'text/html');
-          break;
-        case '.json':
-          res.setHeader('Content-Type', 'application/json');
-          break;
-        case '.png':
-          res.setHeader('Content-Type', 'image/png');
-          break;
-        case '.jpg':
-        case '.jpeg':
-          res.setHeader('Content-Type', 'image/jpeg');
-          break;
-        case '.svg':
-          res.setHeader('Content-Type', 'image/svg+xml');
-          break;
-        case '.woff':
-          res.setHeader('Content-Type', 'font/woff');
-          break;
-        case '.woff2':
-          res.setHeader('Content-Type', 'font/woff2');
-          break;
-        case '.ttf':
-          res.setHeader('Content-Type', 'font/ttf');
-          break;
-        case '.otf':
-          res.setHeader('Content-Type', 'font/otf');
-          break;
-        default:
-          res.setHeader('Content-Type', 'application/octet-stream');
-      }
-
-      // Stream the file
-      const stream = fs.createReadStream(filePath);
-      stream.pipe(res);
-    });
+    const token = pathParts[1];
+    if (token !== ACCESS_TOKENS[app]) {
+      return res.status(403).send('Access Denied: Invalid Token');
+    }
+    next();
   };
 };
 
-// Serve static files for each form application
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', serveStaticWithMime('/docentes/cosmo-doc-o185zfu2c-5xotms', 'form-docentes/build'));
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', serveStaticWithMime('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', 'form-acudientes/build'));
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', serveStaticWithMime('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', 'form-estudiantes/build'));
-
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Serve special image files
-app.get('/rectores.jpeg', (req, res) => {
-  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'rectores.jpeg');
-  res.sendFile(imagePath, {
-    headers: {
-      'Content-Type': 'image/jpeg'
+// Helper function to safely serve static files
+const safeServeStaticFile = (filePath, fallbackPath, contentType, res) => {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      console.error(`Error reading file ${filePath}: ${err.message}`);
+      
+      // Try fallback path if provided
+      if (fallbackPath) {
+        fs.readFile(fallbackPath, (fallbackErr, fallbackData) => {
+          if (fallbackErr) {
+            console.error(`Error reading fallback file ${fallbackPath}: ${fallbackErr.message}`);
+            return res.status(404).send('File not found');
+          }
+          
+          res.setHeader('Content-Type', contentType);
+          res.send(fallbackData);
+        });
+        return;
+      }
+      
+      return res.status(404).send('File not found');
     }
+    
+    res.setHeader('Content-Type', contentType);
+    res.send(data);
   });
-});
+};
 
-app.get('/coordinadores.jpeg', (req, res) => {
-  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'coordinadores.jpeg');
-  res.sendFile(imagePath, {
-    headers: {
-      'Content-Type': 'image/jpeg'
-    }
-  });
-});
+// Mock data for schools (expanded for better testing)
+const mockSchools = [
+  "Colegio Ejemplo 1",
+  "Colegio Ejemplo 2",
+  "Colegio Nacional",
+  "Institución Educativa Principal",
+  "Escuela Básica",
+  "Colegio San José",
+  "Institución Educativa Misericordia",
+  "Colegio Santa María",
+  "Colegio Misioneros del Saber",
+  "Escuela Misión Pedagógica",
+  "Liceo Mixto Departamental",
+  "Colegio Departamental",
+  "Instituto Pedagógico Nacional",
+  "Colegio San Francisco de Asís"
+];
 
-// API routes
+// Handle schools search API
 app.get('/api/search-schools', async (req, res) => {
   console.log('GET /api/search-schools requested');
   console.log('Query parameters:', req.query);
@@ -209,6 +222,7 @@ app.get('/api/search-schools', async (req, res) => {
   }
 });
 
+// Handle POST version of search-schools (used by estudiantes)
 app.post('/api/search-schools', async (req, res) => {
   console.log('POST /api/search-schools requested');
   console.log('Body:', req.body);
@@ -248,6 +262,7 @@ app.post('/api/search-schools', async (req, res) => {
   }
 });
 
+// Handle form submissions
 app.post('/api/submit-form', async (req, res) => {
   // Determine which form app based on the referer
   const referer = req.headers.referer || '';
@@ -487,23 +502,55 @@ app.post('/api/submit-form', async (req, res) => {
   }
 });
 
-// Catch-all routes for client-side routing should be LAST
-app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
-  console.log('Serving docentes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
+// Serve special image files
+app.get('/images/LogoCosmo.png', (req, res) => {
+  console.log('Serving LogoCosmo.png via dedicated route handler');
+  
+  // Primary path
+  const imagePath = path.join(__dirname, 'Stats', 'frontend', 'build', 'images', 'LogoCosmo.png');
+  // Fallback path
+  const fallbackPath = path.join(__dirname, 'Stats', 'frontend', 'public', 'images', 'LogoCosmo.png');
+  
+  safeServeStaticFile(imagePath, fallbackPath, 'image/png', res);
 });
 
-app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
-  console.log('Serving acudientes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
+app.get('/rectores.jpeg', (req, res) => {
+  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'rectores.jpeg');
+  safeServeStaticFile(imagePath, null, 'image/jpeg', res);
 });
 
-app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
-  console.log('Serving estudiantes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
+app.get('/coordinadores.jpeg', (req, res) => {
+  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'coordinadores.jpeg');
+  safeServeStaticFile(imagePath, null, 'image/jpeg', res);
 });
 
-// Welcome page (root route) should be last
+// stats application
+app.use('/stats/:token', (req, res, next) => {
+  if (req.params.token !== ACCESS_TOKENS['stats']) {
+    return res.status(403).send('Access Denied: Invalid Token');
+  }
+  next();
+}, express.static(path.join(__dirname, 'Stats', 'frontend', 'build')));
+
+// Catch-all for client-side routing in React apps
+app.get('/:token', (req, res) => {
+  const token = req.params.token;
+  let appPath;
+  
+  if (token === ACCESS_TOKENS.docentes) {
+    appPath = path.join(__dirname, 'form-docentes', 'build', 'index.html');
+  } else if (token === ACCESS_TOKENS.acudientes) {
+    appPath = path.join(__dirname, 'form-acudientes', 'build', 'index.html');
+  } else if (token === ACCESS_TOKENS.estudiantes) {
+    appPath = path.join(__dirname, 'form-estudiantes', 'build', 'index.html');
+  } else {
+    return res.status(403).send('Access Denied: Invalid Token');
+  }
+  
+  safeServeStaticFile(appPath, null, 'text/html', res);
+});
+
+// Welcome page (root route)
 app.get('/', (req, res) => {
   const links = Object.entries(ACCESS_TOKENS).map(([app, token]) => {
     return `<li><a href="/${app}/${token}">${app.charAt(0).toUpperCase() + app.slice(1)}</a></li>`;
@@ -524,6 +571,7 @@ app.get('/', (req, res) => {
         </style>
       </head>
       <body>
+        <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
         <h1>COSMO Applications</h1>
         <p>Click on the links below to access the applications:</p>
         <ul class="app-list">
@@ -534,41 +582,392 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Configure PostgreSQL connection (if DATABASE_URL is provided)
-let pool;
-const useMockData = !process.env.DATABASE_URL;
-
-if (process.env.DATABASE_URL) {
-  console.log('DATABASE_URL is set. Attempting to connect to database...');
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  });
-  
-  // Test database connection
-  pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-      console.error('Database connection error:', err.stack);
-    } else {
-      console.log('Database connected successfully');
-    }
-  });
-} else {
-  console.log('DATABASE_URL not set. Using mock data for all operations.');
-}
-
-// Access tokens - simplified to avoid special characters
-const ACCESS_TOKENS = {
-  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
-  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
-  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
+// Define the frequency rating mappings
+const frequencyMappings = {
+  comunicacion: {
+    title: "COMUNICACIÓN",
+    items: [
+      {
+        displayText: "Los docentes tienen la disposición de dialogar con las familias sobre los aprendizajes de los estudiantes en espacios adicionales a la entrega de notas.",
+        questionMappings: {
+          docentes: "Tengo la disposición de dialogar con los acudientes sobre los aprendizajes de los estudiantes en momentos adicionales a la entrega de notas.",
+          estudiantes: "Mis profesores están dispuestos a hablar con mis acudientes sobre cómo me está yendo en el colegio, en momentos diferentes a la entrega de notas.",
+          acudientes: "Los profesores tienen la disposición para hablar conmigo sobre los aprendizajes de los estudiantes en momentos adicionales a la entrega de notas."
+        }
+      },
+      {
+        displayText: "Los docentes promueven el apoyo de las familias a los estudiantes por medio de actividades para hacer en casa.",
+        questionMappings: {
+          docentes: "Promuevo el apoyo de los acudientes al aprendizaje de los estudiantes, a través de actividades académicas y lúdicas para realizar en espacios fuera de la institución educativa.",
+          estudiantes: "Mis profesores me dejan actividades para hacer en casa, las cuales necesitan el apoyo de mis acudientes.",
+          acudientes: "Los profesores promueven actividades para que apoye en su proceso de aprendizaje a los estudiantes que tengo a cargo."
+        }
+      }
+    ]
+  },
+  practicas_pedagogicas: {
+    title: "PRÁCTICAS PEDAGÓGICAS",
+    items: [
+      {
+        displayText: "Los intereses y las necesidades de los estudiantes son tenidos en cuenta en la planeación de las clases.",
+        questionMappings: {
+          docentes: "Cuando preparo mis clases tengo en cuenta los intereses y necesidades de los estudiantes.",
+          estudiantes: "Los profesores tienen en cuenta mis intereses y afinidades para escoger lo que vamos a hacer en clase.",
+          acudientes: "Los profesores tienen en cuenta los intereses y necesidades de los estudiantes para escoger los temas que se van a tratar en clase."
+        }
+      }
+    ]
+  },
+  convivencia: {
+    title: "CONVIVENCIA",
+    items: [
+      {
+        displayText: "Todos los estudiantes son tratados con respeto independiente de sus creencias religiosas, género, orientación sexual, etnia y capacidades o talentos.",
+        questionMappings: {
+          docentes: "En el colegio mis estudiantes son tratados con respeto, independiente de sus creencias religiosas, género, orientación sexual, grupo étnico y capacidades o talentos de los demás.",
+          estudiantes: "En el colegio mis compañeros y yo somos tratados con respeto sin importar nuestras creencias religiosas, género, orientación sexual, grupo étnico y capacidades o talentos.",
+          acudientes: "En el colegio los estudiantes son respetuosos y solidarios entre ellos, comprendiendo y aceptando las creencias religiosas, el género, la orientación sexual, el grupo étnico y las capacidades o talentos de los demás."
+        }
+      }
+    ]
+  }
 };
 
+// Calculate frequency percentages for a specific question
+async function calculateFrequency(tableName, question, sectionColumn, school) {
+  if (!question || question === 'NA') {
+    return { S: 0, A: 0, N: 0 };
+  }
+
+  try {
+    console.log(`Calculating frequency for ${tableName}, question: "${question}", column: ${sectionColumn}${school ? `, school: ${school}` : ''}`);
+    
+    let query = `
+      SELECT 
+        jsonb_extract_path_text(${sectionColumn}, $1) as rating,
+        COUNT(*) as count
+      FROM ${tableName}
+      WHERE jsonb_extract_path_text(${sectionColumn}, $1) IS NOT NULL
+    `;
+    
+    const params = [question];
+    
+    // Add school filter if provided
+    if (school) {
+      query += ` AND institucion_educativa = $2`;
+      params.push(school);
+    }
+    
+    query += `
+      GROUP BY jsonb_extract_path_text(${sectionColumn}, $1)
+    `;
+    
+    const result = await pool.query(query, params);
+    
+    if (result.rows.length === 0) {
+      console.log(`No ratings found for question: ${question}`);
+      return { S: 0, A: 0, N: 0 };
+    }
+    
+    let total = 0;
+    const counts = { S: 0, A: 0, N: 0 };
+    
+    result.rows.forEach(row => {
+      const count = parseInt(row.count);
+      total += count;
+      
+      const rating = row.rating.toLowerCase();
+      if (rating.includes('siempre')) {
+        counts.S += count;
+      } else if (rating.includes('veces')) {
+        counts.A += count;
+      } else if (rating.includes('nunca')) {
+        counts.N += count;
+      }
+    });
+    
+    if (total === 0) {
+      return { S: 0, A: 0, N: 0 };
+    }
+    
+    return {
+      S: Math.round((counts.S / total) * 100),
+      A: Math.round((counts.A / total) * 100),
+      N: Math.round((counts.N / total) * 100)
+    };
+  } catch (error) {
+    console.error(`Error calculating frequency for ${tableName}, question: ${question}:`, error);
+    return { S: 0, A: 0, N: 0 };
+  }
+}
+
+app.get('/api/frequency-ratings', async (req, res) => {
+  try {
+    const school = req.query.school;
+    console.log(`Handling frequency-ratings request${school ? ` for school: ${school}` : ' for all schools'}`);
+    
+    const results = [];
+    
+    // Process each section
+    for (const [sectionKey, section] of Object.entries(frequencyMappings)) {
+      const sectionData = {
+        title: section.title,
+        questions: []
+      };
+      
+      // Process each question in the section
+      for (const item of section.items) {
+        // Calculate frequencies for each form type
+        const docentesFreq = await calculateFrequency(
+          'docentes_form_submissions', 
+          item.questionMappings.docentes, 
+          sectionKey,
+          school
+        );
+        
+        const estudiantesFreq = await calculateFrequency(
+          'estudiantes_form_submissions', 
+          item.questionMappings.estudiantes, 
+          sectionKey,
+          school
+        );
+        
+        const acudientesFreq = await calculateFrequency(
+          'acudientes_form_submissions', 
+          item.questionMappings.acudientes, 
+          sectionKey,
+          school
+        );
+        
+        sectionData.questions.push({
+          displayText: item.displayText,
+          questionMappings: item.questionMappings,
+          results: {
+            docentes: docentesFreq,
+            estudiantes: estudiantesFreq,
+            acudientes: acudientesFreq
+          }
+        });
+      }
+      
+      results.push(sectionData);
+    }
+    
+    console.log(`Returning frequency data with ${results.length} sections`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error handling frequency-ratings request:', error);
+    console.error('Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/monitoring', async (req, res) => {
+  try {
+    console.log('Handling monitoring request');
+
+    // Get actual school names from the database
+    const schoolsQuery = `
+      SELECT DISTINCT 
+        nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ as school_name,
+        nombre_s_y_apellido_s_completo_s as rector_name
+      FROM rectores
+      WHERE nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ IS NOT NULL
+      ORDER BY nombre_de_la_institucion_educativa_en_la_actualmente_desempena_
+    `;
+    
+    console.log('Executing schools query for monitoring endpoint');
+    const schoolsResult = await pool.query(schoolsQuery);
+    console.log(`Found ${schoolsResult.rowCount} schools`);
+    
+    // For each school, count submissions in each form table
+    const monitoringData = await Promise.all(
+      schoolsResult.rows.map(async (school) => {
+        // Count submissions for each form type
+        try {
+          const countQueries = [
+            pool.query(`
+              SELECT COUNT(*) as count 
+              FROM docentes_form_submissions 
+              WHERE institucion_educativa = $1
+            `, [school.school_name]),
+            pool.query(`
+              SELECT COUNT(*) as count 
+              FROM estudiantes_form_submissions 
+              WHERE institucion_educativa = $1
+            `, [school.school_name]),
+            pool.query(`
+              SELECT COUNT(*) as count 
+              FROM acudientes_form_submissions 
+              WHERE institucion_educativa = $1
+            `, [school.school_name])
+          ];
+          
+          const [docentesResult, estudiantesResult, acudientesResult] = await Promise.all(countQueries);
+          
+          return {
+            schoolName: school.school_name,
+            rectorName: school.rector_name || 'No especificado',
+            submissions: {
+              docentes: parseInt(docentesResult.rows[0].count) || 0,
+              estudiantes: parseInt(estudiantesResult.rows[0].count) || 0,
+              acudientes: parseInt(acudientesResult.rows[0].count) || 0
+            }
+          };
+        } catch (countError) {
+          console.error(`Error counting submissions for school ${school.school_name}:`, countError);
+          return {
+            schoolName: school.school_name,
+            rectorName: school.rector_name || 'No especificado',
+            submissions: {
+              docentes: 0,
+              estudiantes: 0,
+              acudientes: 0
+            }
+          };
+        }
+      })
+    );
+    
+    console.log(`Returning monitoring data for ${monitoringData.length} schools`);
+    res.json(monitoringData);
+  } catch (error) {
+    console.error('Error handling monitoring request:', error);
+    console.error('Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+});
+
+// Add API endpoints for grade distributions needed by the Stats app
+app.get('/api/test-grades', async (req, res) => {
+  try {
+    const school = req.query.school;
+    console.log(`Handling test-grades request for school: ${school}`);
+    
+    // This endpoint provides grade distribution data for docentes and acudientes
+    // Format expected by the Stats app:
+    // [{ label: 'Grade Name', value: percentage, color: 'color-code' }]
+    
+    // Use mock data for now, but in production this would query the actual submissions
+    const mockGradesData = [
+      { label: '1°', value: 15, color: '#4285F4' },
+      { label: '2°', value: 12, color: '#34A853' },
+      { label: '3°', value: 14, color: '#FBBC05' },
+      { label: '4°', value: 16, color: '#EA4335' },
+      { label: '5°', value: 13, color: '#8F44AD' },
+      { label: '6°', value: 8, color: '#3498DB' },
+      { label: '7°', value: 7, color: '#1ABC9C' },
+      { label: '8°', value: 5, color: '#F39C12' },
+      { label: '9°', value: 4, color: '#D35400' },
+      { label: '10°', value: 3, color: '#C0392B' },
+      { label: '11°', value: 3, color: '#7F8C8D' }
+    ];
+    
+    // Wrap the data array in an object with a 'data' property
+    res.json({
+      school: school,
+      data: mockGradesData,
+      debug: {
+        rawData: []
+      }
+    });
+  } catch (error) {
+    console.error('Error handling test-grades request:', error);
+    console.error('Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+});
+
+app.get('/api/estudiantes-grades', async (req, res) => {
+  try {
+    const school = req.query.school;
+    console.log(`Handling estudiantes-grades request for school: ${school}`);
+    
+    // This endpoint provides grade distribution data for estudiantes
+    // Format expected by the Stats app:
+    // [{ label: 'Grade Name', value: percentage, color: 'color-code' }]
+    
+    // Use mock data for now, but in production this would query the actual submissions
+    const mockEstudiantesGrades = [
+      { label: '5°', value: 20, color: '#4285F4' },
+      { label: '8°', value: 25, color: '#34A853' },
+      { label: '9°', value: 20, color: '#FBBC05' },
+      { label: '10°', value: 20, color: '#EA4335' },
+      { label: '11°', value: 15, color: '#8F44AD' }
+    ];
+    
+    // Wrap the data array in an object with a 'data' property
+    res.json({
+      school: school,
+      data: mockEstudiantesGrades,
+      debug: {
+        rawData: []
+      }
+    });
+  } catch (error) {
+    console.error('Error handling estudiantes-grades request:', error);
+    console.error('Error details:', error.message, error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+});
+
+// Test database connection endpoint
+app.get('/api/test-db', async (req, res) => {
+  try {
+    if (!pool) {
+      return res.status(500).json({ error: 'Database connection not configured' });
+    }
+    
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT NOW() as current_time');
+      res.json({
+        status: 'success',
+        message: 'Database connection successful',
+        timestamp: result.rows[0].current_time
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Database connection failed',
+      error: error.message
+    });
+  }
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.stack);
+  
+  // Don't expose error details in production
+  if (process.env.NODE_ENV === 'production') {
+    res.status(500).send('Internal Server Error');
+  } else {
+    res.status(500).send(`Internal Server Error: ${err.message}`);
+  }
+});
+
 // Start server
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on port ${port}`);
+app.listen(port, () => {
+  console.log(`Simplified COSMO server running on port ${port}`);
   console.log('Access tokens:');
   Object.entries(ACCESS_TOKENS).forEach(([app, token]) => {
     console.log(`${app}: "${token}"`);
   });
-});
+}); 

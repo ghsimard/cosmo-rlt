@@ -4,8 +4,6 @@ export const config = {
     backend: 4001
   },
   api: {
-    baseUrl: process.env.NODE_ENV === 'production'
-      ? 'https://cosmo-rlt-stats.onrender.com'
-      : 'http://localhost:4001'
+    baseUrl: 'http://localhost:4001'
   }
 }; 

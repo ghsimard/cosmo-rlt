@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/css/main.21002bd6.css",
-    "main.js": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.0df91681.js",
+    "main.js": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.283b1ee7.js",
     "static/js/453.3efecf6a.chunk.js": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/453.3efecf6a.chunk.js",
     "index.html": "/docentes/cosmo-doc-o185zfu2c-5xotms/index.html",
     "main.21002bd6.css.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/css/main.21002bd6.css.map",
-    "main.0df91681.js.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.0df91681.js.map",
+    "main.283b1ee7.js.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.283b1ee7.js.map",
     "453.3efecf6a.chunk.js.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/453.3efecf6a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.21002bd6.css",
-    "static/js/main.0df91681.js"
+    "static/js/main.283b1ee7.js"
   ]
 }

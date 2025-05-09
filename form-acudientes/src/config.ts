@@ -5,15 +5,9 @@ export const config = {
     database: 5432
   },
   urls: {
-    frontend: process.env.NODE_ENV === 'production' 
-      ? 'https://form-acudientes.onrender.com'
-      : 'http://localhost:3004',
-    backend: process.env.NODE_ENV === 'production'
-      ? 'https://form-acudientes.onrender.com'
-      : 'http://localhost:3005',
-    api: process.env.NODE_ENV === 'production'
-      ? 'https://form-acudientes.onrender.com/api'
-      : 'http://localhost:3005/api'
+    frontend: `http://localhost:3004`,
+    backend: `http://localhost:3005`,
+    api: `http://localhost:3005/api`
   }
 } as const;
 
