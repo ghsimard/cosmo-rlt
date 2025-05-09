@@ -726,4 +726,37 @@ async function calculateFrequency(tableName, question, sectionColumn, school) {
         COUNT(*) as count
       FROM ${tableName}
       WHERE jsonb_extract_path_text(${sectionColumn}, $1) IS NOT NULL
-    `
+    `;
+
+    if (school) {
+      query += ` AND institucion_educativa = $2`;
+    }
+
+    query += ` GROUP BY rating`;
+
+    const params = [question];
+    if (school) {
+      params.push(school);
+    }
+
+    const result = await pool.query(query, params);
+    
+    const total = result.rows.reduce((sum, row) => sum + parseInt(row.count), 0);
+    const frequencies = {
+      S: 0,
+      A: 0,
+      N: 0
+    };
+
+    result.rows.forEach(row => {
+      if (row.rating && frequencies.hasOwnProperty(row.rating)) {
+        frequencies[row.rating] = (parseInt(row.count) / total) * 100;
+      }
+    });
+
+    return frequencies;
+  } catch (error) {
+    console.error('Error calculating frequency:', error);
+    return { S: 0, A: 0, N: 0 };
+  }
+}
