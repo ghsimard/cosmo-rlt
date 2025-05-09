@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/css/main.def41c21.css",
-    "main.js": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js/main.ffbde277.js",
-    "static/js/453.4fc17be3.chunk.js": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js/453.4fc17be3.chunk.js",
-    "index.html": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/index.html",
-    "main.def41c21.css.map": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/css/main.def41c21.css.map",
-    "main.ffbde277.js.map": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js/main.ffbde277.js.map",
-    "453.4fc17be3.chunk.js.map": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js/453.4fc17be3.chunk.js.map"
+    "main.css": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/css/main.def41c21.css",
+    "main.js": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/js/main.9a6ea806.js",
+    "static/js/453.4fc17be3.chunk.js": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/js/453.4fc17be3.chunk.js",
+    "index.html": "/acudientes/cosmo-acu-o185zfu2c-5xotms/index.html",
+    "main.def41c21.css.map": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/css/main.def41c21.css.map",
+    "main.9a6ea806.js.map": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/js/main.9a6ea806.js.map",
+    "453.4fc17be3.chunk.js.map": "/acudientes/cosmo-acu-o185zfu2c-5xotms/static/js/453.4fc17be3.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.def41c21.css",
-    "static/js/main.ffbde277.js"
+    "static/js/main.9a6ea806.js"
   ]
 }
