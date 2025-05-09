@@ -36,6 +36,11 @@ app.get('/test', (req, res) => {
   });
 });
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Serve static files with proper MIME types
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, path) => {
@@ -574,34 +579,84 @@ app.get('/:token', (req, res) => {
 
 // Welcome page (root route)
 app.get('/', (req, res) => {
-  const links = Object.entries(ACCESS_TOKENS).map(([app, token]) => {
-    return `<li><a href="/${app}/${token}">${app.charAt(0).toUpperCase() + app.slice(1)}</a></li>`;
-  }).join('\n');
+  try {
+    const links = Object.entries(ACCESS_TOKENS).map(([app, token]) => {
+      return `<li><a href="/${app}/${token}">${app.charAt(0).toUpperCase() + app.slice(1)}</a></li>`;
+    }).join('\n');
 
-  res.send(`
-    <html>
-      <head>
-        <title>COSMO Applications</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
-          h1 { color: #333; }
-          .logo { max-width: 200px; margin-bottom: 20px; }
-          .app-list { list-style: none; padding: 0; display: inline-block; text-align: left; }
-          .app-list li { margin: 10px 0; }
-          .app-list a { color: #0066cc; text-decoration: none; padding: 8px 16px; display: inline-block; border: 1px solid #ddd; border-radius: 4px; }
-          .app-list a:hover { background-color: #f0f7ff; text-decoration: none; }
-        </style>
-      </head>
-      <body>
-        <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
-        <h1>COSMO Applications</h1>
-        <p>Click on the links below to access the applications:</p>
-        <ul class="app-list">
-          ${links}
-        </ul>
-      </body>
-    </html>
-  `);
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>COSMO Applications</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 40px; 
+              text-align: center;
+              background-color: #f5f5f5;
+            }
+            .container {
+              max-width: 800px;
+              margin: 0 auto;
+              padding: 20px;
+              background-color: white;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            h1 { 
+              color: #333;
+              margin-bottom: 30px;
+            }
+            .logo { 
+              max-width: 200px; 
+              margin-bottom: 20px;
+            }
+            .app-list { 
+              list-style: none; 
+              padding: 0; 
+              display: inline-block; 
+              text-align: left;
+              margin: 0 auto;
+            }
+            .app-list li { 
+              margin: 15px 0;
+            }
+            .app-list a { 
+              color: #0066cc; 
+              text-decoration: none; 
+              padding: 12px 24px; 
+              display: inline-block; 
+              border: 1px solid #ddd; 
+              border-radius: 4px;
+              transition: all 0.3s ease;
+              min-width: 200px;
+            }
+            .app-list a:hover { 
+              background-color: #f0f7ff; 
+              border-color: #0066cc;
+              transform: translateY(-2px);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
+            <h1>COSMO Applications</h1>
+            <p>Click on the links below to access the applications:</p>
+            <ul class="app-list">
+              ${links}
+            </ul>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error('Error serving welcome page:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Define the frequency rating mappings
