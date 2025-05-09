@@ -69,10 +69,28 @@ const staticOptions = {
   }
 };
 
-// Serve static files for each app
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', serveStatic(path.join(__dirname, 'form-docentes/build'), staticOptions));
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', serveStatic(path.join(__dirname, 'form-acudientes/build'), staticOptions));
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', serveStatic(path.join(__dirname, 'form-estudiantes/build'), staticOptions));
+// Log build directory paths on startup
+console.log('Current working directory:', __dirname);
+console.log('Build directories:');
+console.log('- Docentes:', path.join(__dirname, 'form-docentes/build'));
+console.log('- Acudientes:', path.join(__dirname, 'form-acudientes/build'));
+console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
+
+// Serve static files for each app with detailed logging
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
+  console.log('Serving docentes file:', req.path);
+  serveStatic(path.join(__dirname, 'form-docentes/build'), staticOptions)(req, res, next);
+});
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
+  console.log('Serving acudientes file:', req.path);
+  serveStatic(path.join(__dirname, 'form-acudientes/build'), staticOptions)(req, res, next);
+});
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
+  console.log('Serving estudiantes file:', req.path);
+  serveStatic(path.join(__dirname, 'form-estudiantes/build'), staticOptions)(req, res, next);
+});
 
 // Serve public files
 app.use(express.static('public'));
