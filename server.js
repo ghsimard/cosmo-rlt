@@ -581,7 +581,6 @@ app.get('/', (req, res) => {
         </style>
       </head>
       <body>
-        <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
         <h1>COSMO Applications</h1>
         <p>Click on the links below to access the applications:</p>
         <ul class="app-list">
