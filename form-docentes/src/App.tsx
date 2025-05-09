@@ -181,10 +181,10 @@ function App() {
     // Only fetch new suggestions if we have 3 or more characters
     if (value.length >= 3) {
       try {
-        // Use the correct base URL for API calls
-        const baseUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://cosmorlt.onrender.com'
-          : 'http://localhost:3000';
+        // Use the correct base URL for API calls based on the current hostname
+        const baseUrl = window.location.hostname === 'localhost' 
+          ? 'http://localhost:3000'
+          : 'https://cosmorlt.onrender.com';
         const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`, {
           headers: {
             'Accept': 'application/json',
