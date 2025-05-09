@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Security headers for production
+// Security headers
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     // Security headers
@@ -21,7 +21,13 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 https://*.onrender.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+    next();
+  });
+} else {
+  // More permissive CSP for development
+  app.use((req, res, next) => {
+    res.setHeader('Content-Security-Policy', "default-src 'self' http://localhost:*; connect-src 'self' http://localhost:*; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
     next();
   });
 }
