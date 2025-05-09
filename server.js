@@ -101,11 +101,11 @@ const getMimeType = (filename) => {
 // Serve static files for each app with detailed logging
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
   // Handle %PUBLIC_URL% in paths
-  const path = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving docentes file:', path);
+  const requestPath = req.path.replace('%PUBLIC_URL%', '');
+  console.log('Serving docentes file:', requestPath);
   
   // Try build directory first
-  const buildPath = path.join(__dirname, 'form-docentes/build', path);
+  const buildPath = path.join(__dirname, 'form-docentes/build', requestPath);
   if (fs.existsSync(buildPath)) {
     console.log('Serving from build:', buildPath);
     res.setHeader('Content-Type', getMimeType(buildPath));
@@ -114,7 +114,7 @@ app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
   }
   
   // Try public directory next
-  const publicPath = path.join(__dirname, 'form-docentes/public', path);
+  const publicPath = path.join(__dirname, 'form-docentes/public', requestPath);
   if (fs.existsSync(publicPath)) {
     console.log('Serving from public:', publicPath);
     res.setHeader('Content-Type', getMimeType(publicPath));
@@ -123,8 +123,8 @@ app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
   }
   
   // If file not found, try serving index.html for client-side routing
-  if (path.endsWith('/') || !path.includes('.')) {
-    console.log('Serving index.html for path:', path);
+  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
+    console.log('Serving index.html for path:', requestPath);
     res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
     return;
   }
@@ -134,24 +134,24 @@ app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
 
 // Serve static files for acudientes
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
-  const path = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving acudientes file:', path);
+  const requestPath = req.path.replace('%PUBLIC_URL%', '');
+  console.log('Serving acudientes file:', requestPath);
   
-  const buildPath = path.join(__dirname, 'form-acudientes/build', path);
+  const buildPath = path.join(__dirname, 'form-acudientes/build', requestPath);
   if (fs.existsSync(buildPath)) {
     res.setHeader('Content-Type', getMimeType(buildPath));
     res.sendFile(buildPath);
     return;
   }
   
-  const publicPath = path.join(__dirname, 'form-acudientes/public', path);
+  const publicPath = path.join(__dirname, 'form-acudientes/public', requestPath);
   if (fs.existsSync(publicPath)) {
     res.setHeader('Content-Type', getMimeType(publicPath));
     res.sendFile(publicPath);
     return;
   }
   
-  if (path.endsWith('/') || !path.includes('.')) {
+  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
     res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
     return;
   }
@@ -161,24 +161,24 @@ app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
 
 // Serve static files for estudiantes
 app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
-  const path = req.path.replace('%PUBLIC_URL%', '');
-  console.log('Serving estudiantes file:', path);
+  const requestPath = req.path.replace('%PUBLIC_URL%', '');
+  console.log('Serving estudiantes file:', requestPath);
   
-  const buildPath = path.join(__dirname, 'form-estudiantes/build', path);
+  const buildPath = path.join(__dirname, 'form-estudiantes/build', requestPath);
   if (fs.existsSync(buildPath)) {
     res.setHeader('Content-Type', getMimeType(buildPath));
     res.sendFile(buildPath);
     return;
   }
   
-  const publicPath = path.join(__dirname, 'form-estudiantes/public', path);
+  const publicPath = path.join(__dirname, 'form-estudiantes/public', requestPath);
   if (fs.existsSync(publicPath)) {
     res.setHeader('Content-Type', getMimeType(publicPath));
     res.sendFile(publicPath);
     return;
   }
   
-  if (path.endsWith('/') || !path.includes('.')) {
+  if (requestPath.endsWith('/') || !requestPath.includes('.')) {
     res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
     return;
   }
