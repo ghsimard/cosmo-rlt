@@ -101,18 +101,13 @@ function App() {
       return;
     }
 
-    if (!formData.yearsOfExperience) {
-      alert('Por favor, seleccione sus años de experiencia.');
-      return;
-    }
-
     if (formData.teachingGradesEarly.length === 0 && formData.teachingGradesLate.length === 0) {
-      alert('Por favor, seleccione al menos un grado en el que tiene asignación de actividades de docencia.');
+      alert('Por favor, seleccione al menos un grado en el que enseña.');
       return;
     }
 
     if (formData.schedule.length === 0) {
-      alert('Por favor, seleccione al menos una jornada de trabajo.');
+      alert('Por favor, seleccione al menos una jornada.');
       return;
     }
 
@@ -120,12 +115,10 @@ function App() {
       alert('Por favor, seleccione al menos una fuente de retroalimentación.');
       return;
     }
-    
+
     // Check if all frequency rating questions are answered
     const validateFrequencySection = (questions: string[], section: FrequencySection) => {
-      return questions.every(question => 
-        formData[section][question] !== undefined
-      );
+      return questions.every(question => formData[section][question] !== undefined);
     };
 
     const comunicacionComplete = validateFrequencySection(frequencyQuestions7, 'comunicacion');
@@ -136,41 +129,24 @@ function App() {
       alert('Por favor, responda todas las preguntas de frecuencia antes de enviar el formulario.');
       return;
     }
-    
-    // Prepare the form data for submission
-    const userFormData = {
-      schoolName: formData.schoolName,
-      yearsOfExperience: formData.yearsOfExperience,
-      teachingGradesEarly: formData.teachingGradesEarly,
-      teachingGradesLate: formData.teachingGradesLate,
-      schedule: formData.schedule,
-      feedbackSources: formData.feedbackSources,
-      comunicacion: formData.comunicacion,
-      practicas_pedagogicas: formData.practicas_pedagogicas,
-      convivencia: formData.convivencia
-    };
-    
+
     try {
-      // Use a hardcoded absolute URL that will definitely work
-      const serverUrl = 'http://localhost:3000';
-      console.log("Submitting form to:", `${serverUrl}/api/submit-form`);
-      
-      const response = await fetch(`${serverUrl}/api/submit-form`, {
+      // Use the correct base URL for API calls
+      const baseUrl = window.location.origin;
+      const response = await fetch(`${baseUrl}/api/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Referer': 'http://localhost:3000/docentes/DocToken123'
         },
-        body: JSON.stringify(userFormData)
+        body: JSON.stringify(formData)
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || 'Failed to submit form');
-      }
 
       const result = await response.json();
       
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit form');
+      }
+
       if (result.success) {
         setIsSubmitted(true);
         // Reset form data
@@ -183,14 +159,14 @@ function App() {
           feedbackSources: [],
           comunicacion: {},
           practicas_pedagogicas: {},
-          convivencia: {},
+          convivencia: {}
         });
       } else {
         throw new Error(result.error || 'Failed to submit form');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Error al enviar el formulario. Por favor, intente nuevamente.');
+      alert(`Error al enviar el formulario: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
 
@@ -205,7 +181,9 @@ function App() {
     // Only fetch new suggestions if we have 3 or more characters
     if (value.length >= 3) {
       try {
-        const response = await fetch(`/api/search-schools?q=${encodeURIComponent(value)}`);
+        // Use the correct base URL for API calls
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`);
         if (response.ok) {
           const suggestions = await response.json();
           if (suggestions.length > 0) {
