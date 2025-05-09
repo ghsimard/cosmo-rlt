@@ -43,21 +43,43 @@ app.get('/health', (req, res) => {
 });
 
 // Serve static files with proper MIME types
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', serveStatic(path.join(__dirname, 'form-docentes/build'), {
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms/static', express.static(path.join(__dirname, 'form-docentes/build/static'), {
   setHeaders: (res, filePath) => {
     const mimeType = getMimeType(filePath);
     res.setHeader('Content-Type', mimeType);
   }
 }));
 
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', serveStatic(path.join(__dirname, 'form-acudientes/build'), {
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static', express.static(path.join(__dirname, 'form-acudientes/build/static'), {
   setHeaders: (res, filePath) => {
     const mimeType = getMimeType(filePath);
     res.setHeader('Content-Type', mimeType);
   }
 }));
 
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', serveStatic(path.join(__dirname, 'form-estudiantes/build'), {
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static', express.static(path.join(__dirname, 'form-estudiantes/build/static'), {
+  setHeaders: (res, filePath) => {
+    const mimeType = getMimeType(filePath);
+    res.setHeader('Content-Type', mimeType);
+  }
+}));
+
+// Serve other static files
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
+  setHeaders: (res, filePath) => {
+    const mimeType = getMimeType(filePath);
+    res.setHeader('Content-Type', mimeType);
+  }
+}));
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
+  setHeaders: (res, filePath) => {
+    const mimeType = getMimeType(filePath);
+    res.setHeader('Content-Type', mimeType);
+  }
+}));
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
   setHeaders: (res, filePath) => {
     const mimeType = getMimeType(filePath);
     res.setHeader('Content-Type', mimeType);
@@ -65,7 +87,7 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', serveStatic(path.join(__dir
 }));
 
 // Serve public files
-app.use(serveStatic('public', {
+app.use(express.static('public', {
   setHeaders: (res, filePath) => {
     const mimeType = getMimeType(filePath);
     res.setHeader('Content-Type', mimeType);
