@@ -205,11 +205,7 @@ function App() {
     // Only fetch new suggestions if we have 3 or more characters
     if (value.length >= 3) {
       try {
-        // Use the same hardcoded URL for consistency with form submission
-        const serverUrl = 'http://localhost:3000';
-        console.log("Searching schools at:", `${serverUrl}/api/search-schools?q=${encodeURIComponent(value)}`);
-        
-        const response = await fetch(`${serverUrl}/api/search-schools?q=${encodeURIComponent(value)}`);
+        const response = await fetch(`/api/search-schools?q=${encodeURIComponent(value)}`);
         if (response.ok) {
           const suggestions = await response.json();
           if (suggestions.length > 0) {
