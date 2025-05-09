@@ -8,6 +8,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: DATABASE_URL
         sync: false
       - key: DOCENTES_TOKEN
@@ -16,6 +18,12 @@ services:
         value: cosmo-acu-js4n5cy8ar-f0uax8
       - key: ESTUDIANTES_TOKEN
         value: cosmo-est-o7lmi20mfwb-o9f06j
+      - key: TZ
+        value: America/Bogota
+      - key: SSL_ENABLED
+        value: "true"
+      - key: MAX_REQUEST_SIZE
+        value: "50mb"
     healthCheckPath: /test
     autoDeploy: true
     routes:
