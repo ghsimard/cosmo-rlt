@@ -79,13 +79,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Explicitly handle JavaScript files first
-app.get('*/static/js/*.js', (req, res, next) => {
-  console.log('Serving JavaScript file:', req.path);
-  res.setHeader('Content-Type', 'application/javascript');
-  next();
-});
-
 // Serve static files for each form application with explicit MIME types
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, filePath) => {
@@ -539,18 +532,30 @@ app.post('/api/submit-form', async (req, res) => {
   }
 });
 
-// Catch-all routes for client-side routing AFTER static and API routes
+// Catch-all routes for client-side routing should be LAST
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+  // Skip if the request is for a static file
+  if (req.path.includes('/static/')) {
+    return next();
+  }
   console.log('Serving docentes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
 });
 
 app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+  // Skip if the request is for a static file
+  if (req.path.includes('/static/')) {
+    return next();
+  }
   console.log('Serving acudientes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
 });
 
 app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+  // Skip if the request is for a static file
+  if (req.path.includes('/static/')) {
+    return next();
+  }
   console.log('Serving estudiantes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
 });
