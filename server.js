@@ -68,6 +68,50 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
+// Access tokens - simplified to avoid special characters
+const ACCESS_TOKENS = {
+  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
+  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
+  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
+};
+
+// Token validation middleware
+const validateToken = (app) => {
+  return (req, res, next) => {
+    const pathParts = req.path.split('/');
+    if (pathParts.length < 2) return res.status(403).send('Access Denied');
+    
+    const token = pathParts[1];
+    if (token !== ACCESS_TOKENS[app]) {
+      return res.status(403).send('Access Denied: Invalid Token');
+    }
+    next();
+  };
+};
+
+// MIME type helper
+const getMimeType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.pdf': 'application/pdf',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.otf': 'font/otf'
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
+};
+
 // Serve static files with proper MIME types and caching
 const staticOptions = {
   maxAge: '1d',
@@ -162,50 +206,6 @@ if (process.env.DATABASE_URL) {
 } else {
   console.log('DATABASE_URL not set. Using mock data for all operations.');
 }
-
-// Access tokens - simplified to avoid special characters
-const ACCESS_TOKENS = {
-  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
-  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
-  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
-};
-
-// MIME type helper
-const getMimeType = (filename) => {
-  const ext = path.extname(filename).toLowerCase();
-  const mimeTypes = {
-    '.html': 'text/html',
-    '.js': 'application/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon',
-    '.pdf': 'application/pdf',
-    '.woff': 'font/woff',
-    '.woff2': 'font/woff2',
-    '.ttf': 'font/ttf',
-    '.otf': 'font/otf'
-  };
-  return mimeTypes[ext] || 'application/octet-stream';
-};
-
-// Token validation middleware
-const validateToken = (app) => {
-  return (req, res, next) => {
-    const pathParts = req.path.split('/');
-    if (pathParts.length < 2) return res.status(403).send('Access Denied');
-    
-    const token = pathParts[1];
-    if (token !== ACCESS_TOKENS[app]) {
-      return res.status(403).send('Access Denied: Invalid Token');
-    }
-    next();
-  };
-};
 
 // Mock data for schools (expanded for better testing)
 const mockSchools = [
