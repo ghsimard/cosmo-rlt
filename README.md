@@ -63,9 +63,9 @@ The system uses a proxy server with token-based authentication to secure access 
 
 ## Access Tokens
 
-- **form-docentes**: DocToken123
-- **form-acudientes**: AcuToken456
-- **form-estudiantes**: EstToken789
+- **form-docentes**: cosmo-doc-o185zfu2c-5xotms
+- **form-acudientes**: cosmo-acu-js4n5cy8ar-f0uax8
+- **form-estudiantes**: cosmo-est-o7lmi20mfwb-o9f06j
 
 ## Features
 
@@ -90,24 +90,19 @@ All forms feature enhanced keyboard navigation for improved accessibility:
 
 ## Running the Project
 
-1. Start all applications:
-   ```
-   ./start-all.sh
-   ```
-
-2. Stop all applications:
-   ```
-   ./stop-all.sh
+1. Start the server:
+   ```bash
+   ./start-with-db.sh
    ```
 
-3. Access applications via:
-   - http://localhost/docentes/DocToken123
-   - http://localhost/acudientes/AcuToken456
-   - http://localhost/estudiantes/EstToken789
+2. Access applications via:
+   - http://localhost:3000/docentes/cosmo-doc-o185zfu2c-5xotms
+   - http://localhost:3000/acudientes/cosmo-acu-js4n5cy8ar-f0uax8
+   - http://localhost:3000/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j
 
 ## Project Structure
 
-- **proxy-server.js**: Main proxy server handling routing and authentication
+- **server.js**: Main server handling routing and authentication
 - **form-docentes/**: Teacher survey application
 - **form-acudientes/**: Guardian/parent survey application
 - **form-estudiantes/**: Student survey application
@@ -116,7 +111,7 @@ All forms feature enhanced keyboard navigation for improved accessibility:
 
 - Node.js (v14 or later)
 - npm (v6 or later)
-- Running instances of all three applications on their respective ports
+- PostgreSQL (v14 or later)
 
 ## Installation
 
@@ -125,7 +120,7 @@ All forms feature enhanced keyboard navigation for improved accessibility:
    npm install
    ```
 
-2. Start the proxy server:
+2. Start the server:
    ```bash
    npm start
    ```
@@ -137,15 +132,15 @@ All forms feature enhanced keyboard navigation for improved accessibility:
 
 ## How It Works
 
-- The proxy server runs on port 80 (requires admin privileges or port forwarding)
+- The server runs on port 3000
 - It handles routing to all three applications
 - Each application has a unique access token in the URL
-- API requests are also proxied to the respective backend services
-- A welcome page is available at http://localhost/ with links to all applications
+- API requests are handled by the server
+- A welcome page is available at http://localhost:3000 with links to all applications
 
 ## Configuration
 
-You can modify the `proxy-server.js` file to:
+You can modify the `server.js` file to:
 
 - Change the access tokens
 - Update application ports
@@ -156,11 +151,11 @@ You can modify the `proxy-server.js` file to:
 
 For production deployment:
 
-1. Update the `port` variable in `proxy-server.js` if needed
+1. Update the `port` variable in `server.js` if needed
 2. Set up HTTPS for secure communication
 3. Consider implementing additional security measures like rate limiting
 4. Use a process manager like PM2 to keep the server running:
    ```bash
    npm install -g pm2
-   pm2 start proxy-server.js
+   pm2 start server.js
    ``` 

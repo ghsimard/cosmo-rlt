@@ -267,71 +267,183 @@ app.get('/images/LogoCosmo.png', (req, res) => {
 app.get('/', (req, res) => {
   try {
     const links = Object.entries(ACCESS_TOKENS).map(([app, token]) => {
-      return `<li><a href="/${app}/${token}">${app.charAt(0).toUpperCase() + app.slice(1)}</a></li>`;
+      const appName = app.charAt(0).toUpperCase() + app.slice(1);
+      const descriptions = {
+        docentes: "Formulario para docentes y personal educativo",
+        acudientes: "Formulario para padres y acudientes",
+        estudiantes: "Formulario para estudiantes"
+      };
+      return `
+        <li>
+          <a href="/${app}/${token}">
+            <div class="app-card">
+              <h3>${appName}</h3>
+              <p>${descriptions[app]}</p>
+              <span class="arrow">→</span>
+            </div>
+          </a>
+        </li>`;
     }).join('\n');
 
     res.send(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>COSMO Applications</title>
+          <title>Encuesta de Ambiente Escolar</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 40px; 
-              text-align: center;
-              background-color: #f5f5f5;
+            :root {
+              --primary-color: #2563eb;
+              --primary-hover: #1d4ed8;
+              --text-color: #1f2937;
+              --text-light: #6b7280;
+              --bg-color: #f3f4f6;
+              --card-bg: #ffffff;
+              --border-color: #e5e7eb;
             }
+
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+
+            body { 
+              font-family: 'Inter', sans-serif;
+              background-color: var(--bg-color);
+              color: var(--text-color);
+              line-height: 1.5;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 2rem;
+            }
+
             .container {
               max-width: 800px;
+              width: 100%;
               margin: 0 auto;
-              padding: 20px;
-              background-color: white;
-              border-radius: 8px;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              padding: 2.5rem;
+              background-color: var(--card-bg);
+              border-radius: 1rem;
+              box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             }
-            h1 { 
-              color: #333;
-              margin-bottom: 30px;
+
+            .header {
+              text-align: center;
+              margin-bottom: 3rem;
             }
+
             .logo { 
-              max-width: 200px; 
-              margin-bottom: 20px;
+              max-width: 180px;
+              height: auto;
+              margin-bottom: 1.5rem;
             }
+
+            h1 { 
+              font-size: 2rem;
+              font-weight: 700;
+              color: var(--text-color);
+              margin-bottom: 0.5rem;
+            }
+
+            .subtitle {
+              color: var(--text-light);
+              font-size: 1.25rem;
+              font-weight: 500;
+              margin-bottom: 2rem;
+            }
+
             .app-list { 
-              list-style: none; 
-              padding: 0; 
-              display: inline-block; 
-              text-align: left;
-              margin: 0 auto;
+              list-style: none;
+              display: grid;
+              gap: 1rem;
+              margin: 0;
+              padding: 0;
             }
-            .app-list li { 
-              margin: 15px 0;
+
+            .app-list a {
+              text-decoration: none;
+              color: inherit;
+              display: block;
             }
-            .app-list a { 
-              color: #0066cc; 
-              text-decoration: none; 
-              padding: 12px 24px; 
-              display: inline-block; 
-              border: 1px solid #ddd; 
-              border-radius: 4px;
-              transition: all 0.3s ease;
-              min-width: 200px;
+
+            .app-card {
+              background-color: var(--card-bg);
+              border: 1px solid var(--border-color);
+              border-radius: 0.75rem;
+              padding: 1.5rem;
+              transition: all 0.2s ease;
+              position: relative;
+              overflow: hidden;
             }
-            .app-list a:hover { 
-              background-color: #f0f7ff; 
-              border-color: #0066cc;
+
+            .app-card:hover {
               transform: translateY(-2px);
+              border-color: var(--primary-color);
+              box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            }
+
+            .app-card h3 {
+              font-size: 1.25rem;
+              font-weight: 600;
+              margin-bottom: 0.5rem;
+              color: var(--primary-color);
+            }
+
+            .app-card p {
+              color: var(--text-light);
+              font-size: 0.875rem;
+              margin-bottom: 1rem;
+            }
+
+            .arrow {
+              position: absolute;
+              right: 1.5rem;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 1.5rem;
+              color: var(--primary-color);
+              opacity: 0;
+              transition: all 0.2s ease;
+            }
+
+            .app-card:hover .arrow {
+              opacity: 1;
+              right: 1.25rem;
+            }
+
+            @media (max-width: 640px) {
+              body {
+                padding: 1rem;
+              }
+              
+              .container {
+                padding: 1.5rem;
+              }
+
+              h1 {
+                font-size: 1.5rem;
+              }
+
+              .subtitle {
+                font-size: 1.125rem;
+              }
             }
           </style>
         </head>
         <body>
           <div class="container">
-            <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
-            <h1>COSMO Applications</h1>
-            <p>Click on the links below to access the applications:</p>
+            <div class="header">
+              <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
+              <h1>Encuesta de Ambiente Escolar</h1>
+              <p class="subtitle">Cuestionarios</p>
+            </div>
             <ul class="app-list">
               ${links}
             </ul>
