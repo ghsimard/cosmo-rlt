@@ -87,8 +87,8 @@ console.log('- Docentes:', path.join(__dirname, 'form-docentes/build'));
 console.log('- Acudientes:', path.join(__dirname, 'form-acudientes/build'));
 console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
 
-// Serve static files for each app with detailed logging
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
+// Serve static files for each app with detailed logging and token validation
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', validateToken('docentes'), (req, res, next) => {
   console.log('Serving docentes file:', req.path);
   if (req.path.endsWith('.js')) {
     res.setHeader('Content-Type', 'application/javascript');
@@ -98,7 +98,7 @@ app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
   serveStatic(path.join(__dirname, 'form-docentes/build'), staticOptions)(req, res, next);
 });
 
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', validateToken('acudientes'), (req, res, next) => {
   console.log('Serving acudientes file:', req.path);
   if (req.path.endsWith('.js')) {
     res.setHeader('Content-Type', 'application/javascript');
@@ -108,7 +108,7 @@ app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
   serveStatic(path.join(__dirname, 'form-acudientes/build'), staticOptions)(req, res, next);
 });
 
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', validateToken('estudiantes'), (req, res, next) => {
   console.log('Serving estudiantes file:', req.path);
   if (req.path.endsWith('.js')) {
     res.setHeader('Content-Type', 'application/javascript');
@@ -129,17 +129,17 @@ app.use((req, res, next) => {
 });
 
 // Catch-all for client-side routing in React apps (must be last)
-app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', validateToken('docentes'), (req, res) => {
   console.log('Serving docentes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
 });
 
-app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', validateToken('acudientes'), (req, res) => {
   console.log('Serving acudientes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
 });
 
-app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', validateToken('estudiantes'), (req, res) => {
   console.log('Serving estudiantes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
 });
