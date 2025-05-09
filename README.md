@@ -1,6 +1,6 @@
 # COSMO Project
 
-This is the main application for the COSMO Project, which includes three forms:
+This project includes three forms:
 - Docentes Form
 - Acudientes Form
 - Estudiantes Form
@@ -11,14 +11,16 @@ This is the main application for the COSMO Project, which includes three forms:
 2. Connect your GitHub repository
 3. Use the following settings:
    - Environment: Node
-   - Build Command: (as specified in render.yaml)
-   - Start Command: node server.js
-   - Environment Variables:
-     - DATABASE_URL: Your PostgreSQL database URL
-     - DOCENTES_TOKEN: cosmo-doc-o185zfu2c-5xotms
-     - ACUDIENTES_TOKEN: cosmo-acu-js4n5cy8ar-f0uax8
-     - ESTUDIANTES_TOKEN: cosmo-est-o7lmi20mfwb-o9f06j
-     - NODE_ENV: production
+   - Build Command: Will be taken from render.yaml
+   - Start Command: Will be taken from render.yaml
+   - Auto-Deploy: Yes
+
+### Environment Variables (already set in render.yaml)
+- `DATABASE_URL`: PostgreSQL connection string
+- `DOCENTES_TOKEN`: Access token for docentes form
+- `ACUDIENTES_TOKEN`: Access token for acudientes form
+- `ESTUDIANTES_TOKEN`: Access token for estudiantes form
+- `NODE_ENV`: Set to "production"
 
 ## Local Development
 
@@ -28,15 +30,13 @@ This is the main application for the COSMO Project, which includes three forms:
    cd form-docentes && npm install
    cd ../form-acudientes && npm install
    cd ../form-estudiantes && npm install
-   cd ..
    ```
 
-2. Build the applications:
+2. Build applications:
    ```bash
    cd form-docentes && npm run build
    cd ../form-acudientes && npm run build
    cd ../form-estudiantes && npm run build
-   cd ..
    ```
 
 3. Start the server:
@@ -44,12 +44,12 @@ This is the main application for the COSMO Project, which includes three forms:
    npm start
    ```
 
-## Accessing the Forms
+## Access Forms
 
-Once deployed, you can access the forms at:
-- Docentes Form: `/docentes/cosmo-doc-o185zfu2c-5xotms`
-- Acudientes Form: `/acudientes/cosmo-acu-js4n5cy8ar-f0uax8`
-- Estudiantes Form: `/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j`
+Once deployed, the forms will be available at:
+- Docentes: `/docentes/cosmo-doc-o185zfu2c-5xotms`
+- Acudientes: `/acudientes/cosmo-acu-js4n5cy8ar-f0uax8`
+- Estudiantes: `/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j`
 
 ## Overview
 

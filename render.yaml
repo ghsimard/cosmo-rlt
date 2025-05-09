@@ -1,17 +1,17 @@
 services:
   # Main COSMO application
   - type: web
-    name: cosmo-main
+    name: cosmo-rlt
     env: node
     buildCommand: |
-      cd form-docentes && npm install && npm run build
-      cd ../form-acudientes && npm install && npm run build
-      cd ../form-estudiantes && npm install && npm run build
+      cd form-docentes && npm install && npm run build && \
+      cd ../form-acudientes && npm install && npm run build && \
+      cd ../form-estudiantes && npm install && npm run build && \
       cd .. && npm install
     startCommand: node server.js
     envVars:
       - key: DATABASE_URL
-        value: dpg-d054t79r0fns73d2loeg-a.oregon-postgres.render.com
+        value: postgres://cosmo_rlt_user:Gy5Hs5Hs5Hs5Hs5@dpg-d054t79r0fns73d2loeg-a.oregon-postgres.render.com:5432/cosmo_rlt
       - key: DOCENTES_TOKEN
         value: cosmo-doc-o185zfu2c-5xotms
       - key: ACUDIENTES_TOKEN
@@ -20,7 +20,7 @@ services:
         value: cosmo-est-o7lmi20mfwb-o9f06j
       - key: NODE_ENV
         value: production
-    healthCheckPath: /
+    healthCheckPath: /test
     autoDeploy: true
     routes:
       - type: rewrite
