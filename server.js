@@ -65,78 +65,65 @@ const staticFileMiddleware = (req, res, next) => {
 // Apply the middleware before static file serving
 app.use(staticFileMiddleware);
 
+// Helper function to serve static files
+const serveStaticFile = (filePath, contentType, res, next) => {
+  console.log('Attempting to serve file:', filePath);
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.error('File not found:', filePath);
+      console.error('Error:', err);
+      return next();
+    }
+    
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        console.error('Error reading file:', filePath);
+        console.error('Error:', err);
+        return next(err);
+      }
+      
+      res.setHeader('Content-Type', contentType);
+      res.send(data);
+    });
+  });
+};
+
 // Serve static files with specific routes first
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-docentes/build/static/js', req.params.filename);
   console.log('Serving docentes JS file:', filePath);
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving docentes JS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'application/javascript', res, next);
 });
 
 app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-acudientes/build/static/js', req.params.filename);
   console.log('Serving acudientes JS file:', filePath);
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving acudientes JS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'application/javascript', res, next);
 });
 
 app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/js/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-estudiantes/build/static/js', req.params.filename);
   console.log('Serving estudiantes JS file:', filePath);
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving estudiantes JS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'application/javascript', res, next);
 });
 
 // Serve CSS files
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/static/css/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-docentes/build/static/css', req.params.filename);
   console.log('Serving docentes CSS file:', filePath);
-  res.setHeader('Content-Type', 'text/css');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving docentes CSS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'text/css', res, next);
 });
 
 app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/css/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-acudientes/build/static/css', req.params.filename);
   console.log('Serving acudientes CSS file:', filePath);
-  res.setHeader('Content-Type', 'text/css');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving acudientes CSS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'text/css', res, next);
 });
 
 app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/css/:filename', (req, res, next) => {
   const filePath = path.join(__dirname, 'form-estudiantes/build/static/css', req.params.filename);
   console.log('Serving estudiantes CSS file:', filePath);
-  res.setHeader('Content-Type', 'text/css');
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      console.error('Error serving estudiantes CSS file:', err);
-      next(err);
-    }
-  });
+  serveStaticFile(filePath, 'text/css', res, next);
 });
 
 // Serve other static files
@@ -231,34 +218,6 @@ const validateToken = (app) => {
     }
     next();
   };
-};
-
-// Helper function to safely serve static files
-const safeServeStaticFile = (filePath, fallbackPath, contentType, res) => {
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      console.error(`Error reading file ${filePath}: ${err.message}`);
-      
-      // Try fallback path if provided
-      if (fallbackPath) {
-        fs.readFile(fallbackPath, (fallbackErr, fallbackData) => {
-          if (fallbackErr) {
-            console.error(`Error reading fallback file ${fallbackPath}: ${fallbackErr.message}`);
-            return res.status(404).send('File not found');
-          }
-          
-          res.setHeader('Content-Type', contentType);
-          res.send(fallbackData);
-        });
-        return;
-      }
-      
-      return res.status(404).send('File not found');
-    }
-    
-    res.setHeader('Content-Type', contentType);
-    res.send(data);
-  });
 };
 
 // Mock data for schools (expanded for better testing)
@@ -734,6 +693,7 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+  console.error('Stack:', err.stack);
   res.status(500).send('Internal Server Error');
 });
 
@@ -741,6 +701,11 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log('Current working directory:', process.cwd());
+  console.log('Build directories:');
+  console.log('- Docentes:', path.join(__dirname, 'form-docentes/build'));
+  console.log('- Acudientes:', path.join(__dirname, 'form-acudientes/build'));
+  console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
 }).on('error', (err) => {
   console.error('Server error:', err);
   process.exit(1);
