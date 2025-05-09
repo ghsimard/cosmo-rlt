@@ -98,54 +98,41 @@ const getMimeType = (filename) => {
   return mimeTypes[ext] || 'application/octet-stream';
 };
 
-// Serve static files with proper MIME types and caching
-const staticOptions = {
-  maxAge: '1d',
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    }
-  }
-};
-
-// Log build directory paths on startup
-console.log('Current working directory:', __dirname);
-console.log('Build directories:');
-console.log('- Docentes:', path.join(__dirname, 'form-docentes/build'));
-console.log('- Acudientes:', path.join(__dirname, 'form-acudientes/build'));
-console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
-
 // Serve static files for each app with detailed logging
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
-  console.log('Serving docentes file:', req.path);
-  if (req.path.endsWith('.js')) {
-    res.setHeader('Content-Type', 'application/javascript');
-  } else if (req.path.endsWith('.css')) {
-    res.setHeader('Content-Type', 'text/css');
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms/static', (req, res, next) => {
+  console.log('Serving docentes static file:', req.path);
+  const filePath = path.join(__dirname, 'form-docentes/build/static', req.path);
+  if (fs.existsSync(filePath)) {
+    const ext = path.extname(filePath);
+    res.setHeader('Content-Type', getMimeType(filePath));
+    res.sendFile(filePath);
+  } else {
+    next();
   }
-  serveStatic(path.join(__dirname, 'form-docentes/build'), staticOptions)(req, res, next);
 });
 
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
-  console.log('Serving acudientes file:', req.path);
-  if (req.path.endsWith('.js')) {
-    res.setHeader('Content-Type', 'application/javascript');
-  } else if (req.path.endsWith('.css')) {
-    res.setHeader('Content-Type', 'text/css');
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static', (req, res, next) => {
+  console.log('Serving acudientes static file:', req.path);
+  const filePath = path.join(__dirname, 'form-acudientes/build/static', req.path);
+  if (fs.existsSync(filePath)) {
+    const ext = path.extname(filePath);
+    res.setHeader('Content-Type', getMimeType(filePath));
+    res.sendFile(filePath);
+  } else {
+    next();
   }
-  serveStatic(path.join(__dirname, 'form-acudientes/build'), staticOptions)(req, res, next);
 });
 
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
-  console.log('Serving estudiantes file:', req.path);
-  if (req.path.endsWith('.js')) {
-    res.setHeader('Content-Type', 'application/javascript');
-  } else if (req.path.endsWith('.css')) {
-    res.setHeader('Content-Type', 'text/css');
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static', (req, res, next) => {
+  console.log('Serving estudiantes static file:', req.path);
+  const filePath = path.join(__dirname, 'form-estudiantes/build/static', req.path);
+  if (fs.existsSync(filePath)) {
+    const ext = path.extname(filePath);
+    res.setHeader('Content-Type', getMimeType(filePath));
+    res.sendFile(filePath);
+  } else {
+    next();
   }
-  serveStatic(path.join(__dirname, 'form-estudiantes/build'), staticOptions)(req, res, next);
 });
 
 // Serve public files
