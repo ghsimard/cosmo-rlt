@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/acudientes/AcuToken456/static/css/main.def41c21.css",
+    "main.js": "/acudientes/AcuToken456/static/js/main.cc476f2e.js",
+    "static/js/453.4fc17be3.chunk.js": "/acudientes/AcuToken456/static/js/453.4fc17be3.chunk.js",
+    "index.html": "/acudientes/AcuToken456/index.html",
+    "main.def41c21.css.map": "/acudientes/AcuToken456/static/css/main.def41c21.css.map",
+    "main.cc476f2e.js.map": "/acudientes/AcuToken456/static/js/main.cc476f2e.js.map",
+    "453.4fc17be3.chunk.js.map": "/acudientes/AcuToken456/static/js/453.4fc17be3.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.def41c21.css",
+    "static/js/main.cc476f2e.js"
+  ]
+}

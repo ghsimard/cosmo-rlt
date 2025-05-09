@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/estudiantes/EstToken789/static/css/main.b6ec4637.css",
+    "main.js": "/estudiantes/EstToken789/static/js/main.2ba9970b.js",
+    "index.html": "/estudiantes/EstToken789/index.html",
+    "main.b6ec4637.css.map": "/estudiantes/EstToken789/static/css/main.b6ec4637.css.map",
+    "main.2ba9970b.js.map": "/estudiantes/EstToken789/static/js/main.2ba9970b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b6ec4637.css",
+    "static/js/main.2ba9970b.js"
+  ]
+}
