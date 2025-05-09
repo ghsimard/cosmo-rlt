@@ -1,4 +1,4 @@
-# COSMO Project
+# COSMORLT
 
 This project includes three forms:
 - Docentes Form
@@ -8,7 +8,7 @@ This project includes three forms:
 ## Deployment on Render
 
 1. Create a new Web Service on Render
-2. Connect your GitHub repository
+2. Connect your GitHub repository (COSMORLT)
 3. Use the following settings:
    - Environment: Node
    - Build Command: Will be taken from render.yaml

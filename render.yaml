@@ -1,7 +1,7 @@
 services:
   # Main COSMO application
   - type: web
-    name: cosmo-rlt
+    name: COSMORLT
     env: node
     buildCommand: |
       cd form-docentes && npm install && npm run build && \
