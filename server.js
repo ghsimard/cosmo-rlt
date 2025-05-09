@@ -31,6 +31,25 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Add debugging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+// Catch-all for client-side routing in React apps
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
+});
+
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
+});
+
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
+});
+
 // Configure PostgreSQL connection (if DATABASE_URL is provided)
 let pool;
 const useMockData = !process.env.DATABASE_URL;

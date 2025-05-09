@@ -20,18 +20,20 @@ services:
         value: cosmo-acu-js4n5cy8ar-f0uax8
       - key: ESTUDIANTES_TOKEN
         value: cosmo-est-o7lmi20mfwb-o9f06j
+      - key: PORT
+        value: 10000
     healthCheckPath: /
     autoDeploy: true
     routes:
       - type: rewrite
         source: /docentes/cosmo-doc-o185zfu2c-5xotms/*
-        destination: /form-docentes/*
+        destination: /docentes/cosmo-doc-o185zfu2c-5xotms/*
       - type: rewrite
         source: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*
-        destination: /form-acudientes/*
+        destination: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*
       - type: rewrite
         source: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*
-        destination: /form-estudiantes/*
+        destination: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*
       - type: rewrite
         source: /api/*
         destination: /api/*
