@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     res.setHeader('Content-Security-Policy', 
       "default-src 'self'; " +
-      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/*; " +
+      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/* https://cosmorlt.onrender.com/api/*; " +
       "img-src 'self' data: https:; " +
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     res.setHeader('Content-Security-Policy', 
       "default-src 'self' http://localhost:*; " +
-      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/*; " +
+      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com https://cosmorlt.onrender.com/docentes/* https://cosmorlt.onrender.com/acudientes/* https://cosmorlt.onrender.com/estudiantes/* https://cosmorlt.onrender.com/api/*; " +
       "img-src 'self' data: https:; " +
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +

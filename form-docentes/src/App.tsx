@@ -182,7 +182,9 @@ function App() {
     if (value.length >= 3) {
       try {
         // Use the correct base URL for API calls
-        const baseUrl = window.location.origin;
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://cosmorlt.onrender.com'
+          : 'http://localhost:3000';
         const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`, {
           headers: {
             'Accept': 'application/json',
