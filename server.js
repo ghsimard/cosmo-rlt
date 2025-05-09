@@ -64,6 +64,44 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static', express.static(path.
   }
 }));
 
+// Serve static files with proper MIME types
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms/static/js', express.static(path.join(__dirname, 'form-docentes/build/static/js'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'application/javascript');
+  }
+}));
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/js', express.static(path.join(__dirname, 'form-acudientes/build/static/js'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'application/javascript');
+  }
+}));
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/js', express.static(path.join(__dirname, 'form-estudiantes/build/static/js'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'application/javascript');
+  }
+}));
+
+// Serve static CSS files
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms/static/css', express.static(path.join(__dirname, 'form-docentes/build/static/css'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'text/css');
+  }
+}));
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/css', express.static(path.join(__dirname, 'form-acudientes/build/static/css'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'text/css');
+  }
+}));
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/css', express.static(path.join(__dirname, 'form-estudiantes/build/static/css'), {
+  setHeaders: (res, filePath) => {
+    res.setHeader('Content-Type', 'text/css');
+  }
+}));
+
 // Serve other static files
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, filePath) => {
