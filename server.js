@@ -65,7 +65,23 @@ const staticFileMiddleware = (req, res, next) => {
 // Apply the middleware before static file serving
 app.use(staticFileMiddleware);
 
-// Serve static files
+// Serve static files with specific routes first
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/static/*', (req, res, next) => {
+  const filePath = path.join(__dirname, 'form-docentes/build', req.path.replace('/docentes/cosmo-doc-o185zfu2c-5xotms', ''));
+  res.sendFile(filePath);
+});
+
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/*', (req, res, next) => {
+  const filePath = path.join(__dirname, 'form-acudientes/build', req.path.replace('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', ''));
+  res.sendFile(filePath);
+});
+
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/*', (req, res, next) => {
+  const filePath = path.join(__dirname, 'form-estudiantes/build', req.path.replace('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', ''));
+  res.sendFile(filePath);
+});
+
+// Serve other static files
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
 app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
@@ -80,7 +96,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Catch-all for client-side routing in React apps
+// Catch-all for client-side routing in React apps (must be last)
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
   console.log('Serving docentes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
