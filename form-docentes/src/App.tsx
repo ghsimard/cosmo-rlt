@@ -181,8 +181,8 @@ function App() {
     // Only fetch new suggestions if we have 3 or more characters
     if (value.length >= 3) {
       try {
-        // Get the base URL by removing the subdirectory path
-        const baseUrl = window.location.href.split('/docentes/')[0];
+        // Use production URL for all environments
+        const baseUrl = 'https://cosmorlt.onrender.com';
         console.log('Searching schools at:', `${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`);
         const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`, {
           headers: {
