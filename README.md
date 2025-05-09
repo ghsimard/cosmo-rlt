@@ -1,6 +1,55 @@
 # COSMO Project
 
-Multi-application system with four components: form-docentes, form-acudientes, form-estudiantes, and Stats.
+This is the main application for the COSMO Project, which includes three forms:
+- Docentes Form
+- Acudientes Form
+- Estudiantes Form
+
+## Deployment on Render
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Use the following settings:
+   - Environment: Node
+   - Build Command: (as specified in render.yaml)
+   - Start Command: node server.js
+   - Environment Variables:
+     - DATABASE_URL: Your PostgreSQL database URL
+     - DOCENTES_TOKEN: cosmo-doc-o185zfu2c-5xotms
+     - ACUDIENTES_TOKEN: cosmo-acu-js4n5cy8ar-f0uax8
+     - ESTUDIANTES_TOKEN: cosmo-est-o7lmi20mfwb-o9f06j
+     - NODE_ENV: production
+
+## Local Development
+
+1. Install dependencies:
+   ```bash
+   npm install
+   cd form-docentes && npm install
+   cd ../form-acudientes && npm install
+   cd ../form-estudiantes && npm install
+   cd ..
+   ```
+
+2. Build the applications:
+   ```bash
+   cd form-docentes && npm run build
+   cd ../form-acudientes && npm run build
+   cd ../form-estudiantes && npm run build
+   cd ..
+   ```
+
+3. Start the server:
+   ```bash
+   npm start
+   ```
+
+## Accessing the Forms
+
+Once deployed, you can access the forms at:
+- Docentes Form: `/docentes/cosmo-doc-o185zfu2c-5xotms`
+- Acudientes Form: `/acudientes/cosmo-acu-js4n5cy8ar-f0uax8`
+- Estudiantes Form: `/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j`
 
 ## Overview
 

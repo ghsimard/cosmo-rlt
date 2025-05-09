@@ -4,24 +4,22 @@ services:
     name: cosmo-main
     env: node
     buildCommand: |
-      npm install
       cd form-docentes && npm install && npm run build
       cd ../form-acudientes && npm install && npm run build
       cd ../form-estudiantes && npm install && npm run build
+      cd .. && npm install
     startCommand: node server.js
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
-        sync: false
+        value: dpg-d054t79r0fns73d2loeg-a.oregon-postgres.render.com
       - key: DOCENTES_TOKEN
         value: cosmo-doc-o185zfu2c-5xotms
       - key: ACUDIENTES_TOKEN
         value: cosmo-acu-js4n5cy8ar-f0uax8
       - key: ESTUDIANTES_TOKEN
         value: cosmo-est-o7lmi20mfwb-o9f06j
-      - key: PORT
-        value: 10000
+      - key: NODE_ENV
+        value: production
     healthCheckPath: /
     autoDeploy: true
     routes:
