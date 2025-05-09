@@ -53,12 +53,11 @@ Once deployed, the forms will be available at:
 
 ## Overview
 
-The COSMO Project is a comprehensive survey and statistics system for educational institutions. It consists of:
+The COSMO Project is a comprehensive survey system for educational institutions. It consists of:
 
 - **form-docentes**: Form for teachers
 - **form-acudientes**: Form for guardians/parents
 - **form-estudiantes**: Form for students
-- **Stats**: Dashboard for viewing and analyzing survey results
 
 The system uses a proxy server with token-based authentication to secure access to each application.
 
@@ -67,7 +66,6 @@ The system uses a proxy server with token-based authentication to secure access 
 - **form-docentes**: DocToken123
 - **form-acudientes**: AcuToken456
 - **form-estudiantes**: EstToken789
-- **Stats**: StatsToken012
 
 ## Features
 
@@ -106,7 +104,6 @@ All forms feature enhanced keyboard navigation for improved accessibility:
    - http://localhost/docentes/DocToken123
    - http://localhost/acudientes/AcuToken456
    - http://localhost/estudiantes/EstToken789
-   - http://localhost/stats/StatsToken012
 
 ## Project Structure
 
@@ -114,13 +111,12 @@ All forms feature enhanced keyboard navigation for improved accessibility:
 - **form-docentes/**: Teacher survey application
 - **form-acudientes/**: Guardian/parent survey application
 - **form-estudiantes/**: Student survey application
-- **Stats/**: Statistics and analysis dashboard
 
 ## Prerequisites
 
 - Node.js (v14 or later)
 - npm (v6 or later)
-- Running instances of all four applications on their respective ports
+- Running instances of all three applications on their respective ports
 
 ## Installation
 
@@ -142,7 +138,7 @@ All forms feature enhanced keyboard navigation for improved accessibility:
 ## How It Works
 
 - The proxy server runs on port 80 (requires admin privileges or port forwarding)
-- It handles routing to all four applications
+- It handles routing to all three applications
 - Each application has a unique access token in the URL
 - API requests are also proxied to the respective backend services
 - A welcome page is available at http://localhost/ with links to all applications

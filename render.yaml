@@ -1,13 +1,17 @@
 services:
   # Main COSMO application
   - type: web
-    name: COSMORLT
+    name: cosmo-rlt
     env: node
-    buildCommand: npm install && cd form-docentes && npm install && npm run build && cd ../form-acudientes && npm install && npm run build && cd ../form-estudiantes && npm install && npm run build && cd ..
-    startCommand: node server.js
+    buildCommand: |
+      npm install
+      cd form-docentes && npm install && npm run build
+      cd ../form-acudientes && npm install && npm run build
+      cd ../form-estudiantes && npm install && npm run build
+    startCommand: npm start
     envVars:
       - key: DATABASE_URL
-        value: postgres://cosmo_rlt_user:cosmo_rlt_password@dpg-cp8f1e21hbls73fmk0tg-a.oregon-postgres.render.com/cosmo_rlt
+        sync: false
       - key: DOCENTES_TOKEN
         value: cosmo-doc-o185zfu2c-5xotms
       - key: ACUDIENTES_TOKEN

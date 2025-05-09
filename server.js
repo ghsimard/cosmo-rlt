@@ -247,7 +247,7 @@ app.get('/:token', (req, res) => {
 
 // Serve COSMO logo
 app.get('/images/LogoCosmo.png', (req, res) => {
-  const filePath = path.join(__dirname, 'Stats/frontend/public/images/LogoCosmo.png');
+  const filePath = path.join(__dirname, 'public/images/LogoCosmo.png');
   console.log('Serving LogoCosmo.png from:', filePath);
   if (fs.existsSync(filePath)) {
     res.setHeader('Content-Type', 'image/png');
