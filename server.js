@@ -52,7 +52,12 @@ app.use((req, res, next) => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -64,7 +69,7 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval';");
     next();
   });
 }
@@ -125,7 +130,7 @@ const getMimeType = (filename) => {
   return mimeTypes[ext] || 'application/octet-stream';
 };
 
-// Serve static files for each app
+// Serve static files for each app with their specific tokens
 const serveApp = (basePath, buildDir) => {
   // Serve static files
   app.use(basePath, express.static(path.join(__dirname, buildDir), {
@@ -144,124 +149,30 @@ const serveApp = (basePath, buildDir) => {
   });
 };
 
-// Debug middleware - add this before the app routes
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  next();
-});
-
-// Serve each application
+// Serve each application with correct tokens
 serveApp('/docentes/cosmo-doc-o185zfu2c-5xotms', 'form-docentes/build');
 serveApp('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', 'form-acudientes/build');
 serveApp('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', 'form-estudiantes/build');
 
-// Serve static files from public directory
-app.use('/static', express.static(path.join(__dirname, 'form-docentes/build/static'), {
-  setHeaders: (res, filePath) => {
-    const contentType = getMimeType(filePath);
-    res.setHeader('Content-Type', contentType);
-    console.log(`Serving static file ${filePath} with content type ${contentType}`);
-  }
-}));
+// Serve static files from each app's build directory
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms/static', express.static(path.join(__dirname, 'form-docentes/build/static')));
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static', express.static(path.join(__dirname, 'form-acudientes/build/static')));
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static', express.static(path.join(__dirname, 'form-estudiantes/build/static')));
 
-// Serve images
-app.use('/images', express.static(path.join(__dirname, 'form-docentes/build'), {
-  setHeaders: (res, filePath) => {
-    const contentType = getMimeType(filePath);
-    res.setHeader('Content-Type', contentType);
-    console.log(`Serving image ${filePath} with content type ${contentType}`);
-  }
-}));
-
-// Serve images directly with error handling
-app.get('/rectores.jpeg', (req, res) => {
-  const filePath = path.join(__dirname, 'form-docentes/public/rectores.jpeg');
-  console.log('Serving rectores.jpeg from:', filePath);
-  if (fs.existsSync(filePath)) {
-    res.setHeader('Content-Type', 'image/jpeg');
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error('Error sending rectores.jpeg:', err);
-        res.status(500).send('Error serving image');
-      }
-    });
-  } else {
-    console.error('rectores.jpeg not found at:', filePath);
-    res.status(404).send('Image not found');
-  }
+// Serve manifest.json for each app
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-docentes/build/manifest.json'));
+});
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-acudientes/build/manifest.json'));
+});
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/manifest.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'form-estudiantes/build/manifest.json'));
 });
 
-app.get('/coordinadores.jpeg', (req, res) => {
-  const filePath = path.join(__dirname, 'form-docentes/public/coordinadores.jpeg');
-  console.log('Serving coordinadores.jpeg from:', filePath);
-  if (fs.existsSync(filePath)) {
-    res.setHeader('Content-Type', 'image/jpeg');
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error('Error sending coordinadores.jpeg:', err);
-        res.status(500).send('Error serving image');
-      }
-    });
-  } else {
-    console.error('coordinadores.jpeg not found at:', filePath);
-    res.status(404).send('Image not found');
-  }
-});
-
-// Serve manifest.json with error handling
-app.get('/manifest.json', (req, res) => {
-  const filePath = path.join(__dirname, 'form-docentes/public/manifest.json');
-  console.log('Serving manifest.json from:', filePath);
-  if (fs.existsSync(filePath)) {
-    res.setHeader('Content-Type', 'application/json');
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error('Error sending manifest.json:', err);
-        res.status(500).send('Error serving manifest');
-      }
-    });
-  } else {
-    console.error('manifest.json not found at:', filePath);
-    res.status(404).send('Manifest not found');
-  }
-});
-
-// Catch-all for client-side routing in React apps
-app.get('/:token', (req, res) => {
-  const token = req.params.token;
-  let appPath;
-  
-  if (token === ACCESS_TOKENS.docentes) {
-    appPath = path.join(__dirname, 'form-docentes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.acudientes) {
-    appPath = path.join(__dirname, 'form-acudientes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.estudiantes) {
-    appPath = path.join(__dirname, 'form-estudiantes', 'build', 'index.html');
-  } else {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  
-  safeServeStaticFile(appPath, null, 'text/html', res);
-});
-
-// Serve COSMO logo
-app.get('/images/LogoCosmo.png', (req, res) => {
-  const filePath = path.join(__dirname, 'public/images/LogoCosmo.png');
-  console.log('Serving LogoCosmo.png from:', filePath);
-  if (fs.existsSync(filePath)) {
-    res.setHeader('Content-Type', 'image/png');
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error('Error sending LogoCosmo.png:', err);
-        res.status(500).send('Error serving image');
-      }
-    });
-  } else {
-    console.error('LogoCosmo.png not found at:', filePath);
-    res.status(404).send('Image not found');
-  }
-});
+// Serve logos from common directory
+app.use('/logos', express.static(path.join(__dirname, 'public/logos')));
+app.use('/images', express.static(path.join(__dirname, 'public/logos')));
 
 // Welcome page (root route)
 app.get('/', (req, res) => {
@@ -273,9 +184,14 @@ app.get('/', (req, res) => {
         acudientes: "Formulario para padres y acudientes",
         estudiantes: "Formulario para estudiantes"
       };
+      const ports = {
+        docentes: 3001,
+        acudientes: 3003,
+        estudiantes: 3002
+      };
       return `
         <li>
-          <a href="/${app}/${token}">
+          <a href="http://localhost:${ports[app]}/${app}/${token}">
             <div class="app-card">
               <h3>${appName}</h3>
               <p>${descriptions[app]}</p>
@@ -440,7 +356,7 @@ app.get('/', (req, res) => {
         <body>
           <div class="container">
             <div class="header">
-              <img src="/images/LogoCosmo.png" alt="COSMO Logo" class="logo">
+              <img src="/logos/LogoCosmo.png" alt="COSMO Logo" class="logo">
               <h1>Encuesta de Ambiente Escolar</h1>
               <p class="subtitle">Cuestionarios</p>
             </div>
@@ -540,18 +456,17 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server with proper error handling
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const server = app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
   console.log('Current working directory:', process.cwd());
   console.log('Build directories:');
   console.log('- Docentes:', path.join(__dirname, 'form-docentes/build'));
   console.log('- Acudientes:', path.join(__dirname, 'form-acudientes/build'));
   console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
-}).on('error', (err) => {
-  console.error('Server error:', err);
-  process.exit(1);
 });
+
+// Increase header size limit for the server
+server.maxHeaderSize = 64 * 1024; // 64KB
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
