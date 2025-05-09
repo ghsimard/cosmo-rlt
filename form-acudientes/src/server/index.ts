@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3005;
+const port = process.env.PORT || 3001;
 
 // Debug environment
 console.log('Environment:', {
@@ -23,7 +23,47 @@ console.log('Environment:', {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Increase header size limit
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  next();
+});
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../../build')));
+
+// PostgreSQL connection configuration
+if (!process.env.DATABASE_URL) {
+  console.error('DATABASE_URL environment variable is not set!');
+  process.exit(1);
+}
+
+const dbConfig = {
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
+};
+
+console.log('Database config:', {
+  hasConnectionString: !!dbConfig.connectionString,
+  ssl: dbConfig.ssl
+});
+
+const pool = new Pool(dbConfig);
+
+// Test database connection
+pool.query('SELECT NOW()')
+  .then(() => console.log('Successfully connected to database'))
+  .catch(err => {
+    console.error('Error connecting to database:', err);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  });
 
 // Health check endpoint
 app.get('/health', async (req, res) => {
@@ -43,117 +83,85 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../../build')));
-
-// PostgreSQL connection configuration
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL environment variable is not set!');
-  process.exit(1); // Exit if no database URL is provided
-}
-
-const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false,
-    sslmode: 'require'
-  } : false
-};
-
-console.log('Database config:', {
-  hasConnectionString: !!dbConfig.connectionString,
-  ssl: dbConfig.ssl
-});
-
-const pool = new Pool(dbConfig);
-
-// Test database connection
-pool.query('SELECT NOW()')
-  .then(() => console.log('Successfully connected to database'))
-  .catch(err => {
-    console.error('Error connecting to database:', err);
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1); // Exit in production if we can't connect to the database
-    }
-  });
-
 // API endpoint to save form data
 app.post('/api/submit-form', async (req, res) => {
   try {
-    console.log('Received form data:', req.body);
-
     const {
       schoolName,
-      studentGrades,
-      frequencyRatings5,
-      frequencyRatings6,
-      frequencyRatings7
+      yearsOfExperience,
+      teachingGradesEarly,
+      teachingGradesLate,
+      schedule,
+      feedbackSources,
+      comunicacion,
+      practicas_pedagogicas,
+      convivencia
     } = req.body;
 
     // Validate required fields
-    if (!schoolName) {
-      throw new Error('Missing required field: schoolName');
-    }
-
-    // Validate student grades
-    if (!studentGrades || !Array.isArray(studentGrades) || studentGrades.length === 0) {
-      throw new Error('Student grades must be a non-empty array');
+    if (!schoolName || !yearsOfExperience || !schedule) {
+      throw new Error('Missing required fields');
     }
 
     // Validate frequency ratings
-    if (!frequencyRatings5 || !frequencyRatings6 || !frequencyRatings7) {
+    if (!comunicacion || !practicas_pedagogicas || !convivencia) {
       throw new Error('Missing frequency ratings');
+    }
+
+    // Combine early and late grades into current_grade
+    const currentGrade = [...(teachingGradesEarly || []), ...(teachingGradesLate || [])][0] || '';
+    
+    if (!currentGrade) {
+      throw new Error('No grade selected');
     }
 
     const query = `
       INSERT INTO acudientes_form_submissions (
         institucion_educativa,
-        grados_estudiantes,
+        anos_estudiando,
+        grado_actual,
+        jornada,
         comunicacion,
         practicas_pedagogicas,
         convivencia
       )
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *;
     `;
 
     const values = [
       schoolName,
-      studentGrades,
-      JSON.stringify(frequencyRatings5),
-      JSON.stringify(frequencyRatings6),
-      JSON.stringify(frequencyRatings7)
+      yearsOfExperience,
+      currentGrade,
+      schedule,
+      JSON.stringify(comunicacion),
+      JSON.stringify(practicas_pedagogicas),
+      JSON.stringify(convivencia)
     ];
 
-    console.log('Executing query with values:', values);
-
     const result = await pool.query(query, values);
-    console.log('Query result:', result.rows[0]);
-
     res.json({
       success: true,
       data: result.rows[0]
     });
-  } catch (error: any) {
-    console.error('Error saving form data:', error);
+  } catch (error) {
+    console.error('Error saving form:', error);
     res.status(500).json({
       success: false,
-      error: process.env.NODE_ENV === 'production' 
-        ? 'Failed to save form data' 
-        : error.message
+      error: error instanceof Error ? error.message : 'Failed to save form response'
     });
   }
 });
 
 // API endpoint to search for school names
-app.get('/api/search-schools', async (req, res) => {
-  const searchTerm = req.query.q;
+app.post('/api/search-schools', async (req, res) => {
+  const searchTerm = req.body.q;
   
   try {
     const query = `
-      SELECT DISTINCT TRIM(nombre_de_la_institucion_educativa_en_la_actualmente_desempena_) as school_name
+      SELECT DISTINCT nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ as school_name
       FROM rectores
-      WHERE LOWER(TRIM(nombre_de_la_institucion_educativa_en_la_actualmente_desempena_)) LIKE LOWER($1)
+      WHERE LOWER(nombre_de_la_institucion_educativa_en_la_actualmente_desempena_) LIKE LOWER($1)
       ORDER BY school_name;
     `;
     
