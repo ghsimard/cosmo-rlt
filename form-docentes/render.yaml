@@ -11,4 +11,12 @@ services:
       - key: PORT
         value: 3001 
       - key: DATABASE_URL
-        sync: false  # This will be set in the Render dashboard
+        fromDatabase:
+          name: COSMO_RLT_db
+          property: connectionString
+
+databases:
+  - name: COSMO_RLT_db
+    databaseName: form_docentes
+    user: form_docentes_user
+    plan: free
