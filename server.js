@@ -81,8 +81,18 @@ app.use((req, res, next) => {
 
 // Serve static files for each form application
 const serveStaticWithMime = (basePath, directory) => {
-  return express.static(path.join(__dirname, directory), {
-    setHeaders: (res, filePath) => {
+  return (req, res, next) => {
+    const filePath = path.join(__dirname, directory, req.path);
+    console.log('Serving static file:', filePath);
+    
+    // Check if file exists
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        console.log('File not found:', filePath);
+        return next();
+      }
+
+      // Set appropriate MIME type
       const ext = path.extname(filePath).toLowerCase();
       switch (ext) {
         case '.js':
@@ -122,8 +132,12 @@ const serveStaticWithMime = (basePath, directory) => {
         default:
           res.setHeader('Content-Type', 'application/octet-stream');
       }
-    }
-  });
+
+      // Stream the file
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    });
+  };
 };
 
 // Serve static files for each form application
