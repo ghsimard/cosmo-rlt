@@ -72,62 +72,6 @@ app.get('/test', (req, res) => {
   });
 });
 
-// Custom middleware to serve static files with correct MIME types
-const serveStaticWithMime = (basePath, directory) => {
-  return (req, res, next) => {
-    const filePath = path.join(directory, req.path);
-    
-    // Check if file exists
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-      if (err) {
-        return next();
-      }
-
-      // Get MIME type using mime package
-      const contentType = mime.getType(filePath) || 'application/octet-stream';
-      res.setHeader('Content-Type', contentType);
-
-      // Stream the file
-      const stream = fs.createReadStream(filePath);
-      stream.pipe(res);
-    });
-  };
-};
-
-// Serve static files for each form application
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-  }
-}));
-
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-  }
-}));
-
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-  }
-}));
-
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname, 'public'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
-  }
-}));
-
 // Debug middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -135,136 +79,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Catch-all for client-side routing in React apps
-app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
-  console.log('Serving docentes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
+// Explicitly handle JavaScript files first
+app.get('*/static/js/*.js', (req, res, next) => {
+  console.log('Serving JavaScript file:', req.path);
+  res.setHeader('Content-Type', 'application/javascript');
+  next();
 });
 
-app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
-  console.log('Serving acudientes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
-});
+// Serve static files for each form application
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
 
-app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
-  console.log('Serving estudiantes app for path:', req.path);
-  res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
-});
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Configure PostgreSQL connection (if DATABASE_URL is provided)
-let pool;
-const useMockData = !process.env.DATABASE_URL;
-
-if (process.env.DATABASE_URL) {
-  console.log('DATABASE_URL is set. Attempting to connect to database...');
-  pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  });
-  
-  // Test database connection
-  pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-      console.error('Database connection error:', err.stack);
-    } else {
-      console.log('Database connected successfully');
-    }
-  });
-} else {
-  console.log('DATABASE_URL not set. Using mock data for all operations.');
-}
-
-// Access tokens - simplified to avoid special characters
-const ACCESS_TOKENS = {
-  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
-  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
-  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
-};
-
-// MIME type helper
-const getMimeType = (filename) => {
-  const ext = path.extname(filename).toLowerCase();
-  const mimeTypes = {
-    '.html': 'text/html',
-    '.js': 'application/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon',
-    '.pdf': 'application/pdf',
-    '.woff': 'font/woff',
-    '.woff2': 'font/woff2',
-    '.ttf': 'font/ttf',
-    '.otf': 'font/otf'
-  };
-  return mimeTypes[ext] || 'application/octet-stream';
-};
-
-// Token validation middleware
-const validateToken = (app) => {
-  return (req, res, next) => {
-    const pathParts = req.path.split('/');
-    if (pathParts.length < 2) return res.status(403).send('Access Denied');
-    
-    const token = pathParts[1];
-    if (token !== ACCESS_TOKENS[app]) {
-      return res.status(403).send('Access Denied: Invalid Token');
-    }
-    next();
-  };
-};
-
-// Helper function to safely serve static files
-const safeServeStaticFile = (filePath, fallbackPath, contentType, res) => {
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      console.error(`Error reading file ${filePath}: ${err.message}`);
-      
-      // Try fallback path if provided
-      if (fallbackPath) {
-        fs.readFile(fallbackPath, (fallbackErr, fallbackData) => {
-          if (fallbackErr) {
-            console.error(`Error reading fallback file ${fallbackPath}: ${fallbackErr.message}`);
-            return res.status(404).send('File not found');
-          }
-          
-          res.setHeader('Content-Type', contentType);
-          res.send(fallbackData);
-        });
-        return;
-      }
-      
-      return res.status(404).send('File not found');
-    }
-    
-    res.setHeader('Content-Type', contentType);
-    res.send(data);
-  });
-};
-
-// Mock data for schools (expanded for better testing)
-const mockSchools = [
-  "Colegio Ejemplo 1",
-  "Colegio Ejemplo 2",
-  "Colegio Nacional",
-  "Institución Educativa Principal",
-  "Escuela Básica",
-  "Colegio San José",
-  "Institución Educativa Misericordia",
-  "Colegio Santa María",
-  "Colegio Misioneros del Saber",
-  "Escuela Misión Pedagógica",
-  "Liceo Mixto Departamental",
-  "Colegio Departamental",
-  "Instituto Pedagógico Nacional",
-  "Colegio San Francisco de Asís"
-];
-
-// Handle schools search API
+// API routes
 app.get('/api/search-schools', async (req, res) => {
   console.log('GET /api/search-schools requested');
   console.log('Query parameters:', req.query);
@@ -306,7 +136,6 @@ app.get('/api/search-schools', async (req, res) => {
   }
 });
 
-// Handle POST version of search-schools (used by estudiantes)
 app.post('/api/search-schools', async (req, res) => {
   console.log('POST /api/search-schools requested');
   console.log('Body:', req.body);
@@ -346,7 +175,6 @@ app.post('/api/search-schools', async (req, res) => {
   }
 });
 
-// Handle form submissions
 app.post('/api/submit-form', async (req, res) => {
   // Determine which form app based on the referer
   const referer = req.headers.referer || '';
@@ -586,55 +414,23 @@ app.post('/api/submit-form', async (req, res) => {
   }
 });
 
-// Serve special image files
-app.get('/images/LogoCosmo.png', (req, res) => {
-  console.log('Serving LogoCosmo.png via dedicated route handler');
-  
-  // Primary path
-  const imagePath = path.join(__dirname, 'Stats', 'frontend', 'build', 'images', 'LogoCosmo.png');
-  // Fallback path
-  const fallbackPath = path.join(__dirname, 'Stats', 'frontend', 'public', 'images', 'LogoCosmo.png');
-  
-  safeServeStaticFile(imagePath, fallbackPath, 'image/png', res);
+// Catch-all routes for client-side routing AFTER static and API routes
+app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+  console.log('Serving docentes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
 });
 
-app.get('/rectores.jpeg', (req, res) => {
-  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'rectores.jpeg');
-  safeServeStaticFile(imagePath, null, 'image/jpeg', res);
+app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+  console.log('Serving acudientes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
 });
 
-app.get('/coordinadores.jpeg', (req, res) => {
-  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'coordinadores.jpeg');
-  safeServeStaticFile(imagePath, null, 'image/jpeg', res);
+app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+  console.log('Serving estudiantes app for path:', req.path);
+  res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
 });
 
-// stats application
-app.use('/stats/:token', (req, res, next) => {
-  if (req.params.token !== ACCESS_TOKENS['stats']) {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  next();
-}, express.static(path.join(__dirname, 'Stats', 'frontend', 'build')));
-
-// Catch-all for client-side routing in React apps
-app.get('/:token', (req, res) => {
-  const token = req.params.token;
-  let appPath;
-  
-  if (token === ACCESS_TOKENS.docentes) {
-    appPath = path.join(__dirname, 'form-docentes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.acudientes) {
-    appPath = path.join(__dirname, 'form-acudientes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.estudiantes) {
-    appPath = path.join(__dirname, 'form-estudiantes', 'build', 'index.html');
-  } else {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  
-  safeServeStaticFile(appPath, null, 'text/html', res);
-});
-
-// Welcome page (root route)
+// Welcome page (root route) should be last
 app.get('/', (req, res) => {
   const links = Object.entries(ACCESS_TOKENS).map(([app, token]) => {
     return `<li><a href="/${app}/${token}">${app.charAt(0).toUpperCase() + app.slice(1)}</a></li>`;
@@ -666,124 +462,144 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Define the frequency rating mappings
-const frequencyMappings = {
-  comunicacion: {
-    title: "COMUNICACIÓN",
-    items: [
-      {
-        displayText: "Los docentes tienen la disposición de dialogar con las familias sobre los aprendizajes de los estudiantes en espacios adicionales a la entrega de notas.",
-        questionMappings: {
-          docentes: "Tengo la disposición de dialogar con los acudientes sobre los aprendizajes de los estudiantes en momentos adicionales a la entrega de notas.",
-          estudiantes: "Mis profesores están dispuestos a hablar con mis acudientes sobre cómo me está yendo en el colegio, en momentos diferentes a la entrega de notas.",
-          acudientes: "Los profesores tienen la disposición para hablar conmigo sobre los aprendizajes de los estudiantes en momentos adicionales a la entrega de notas."
-        }
-      },
-      {
-        displayText: "Los docentes promueven el apoyo de las familias a los estudiantes por medio de actividades para hacer en casa.",
-        questionMappings: {
-          docentes: "Promuevo el apoyo de los acudientes al aprendizaje de los estudiantes, a través de actividades académicas y lúdicas para realizar en espacios fuera de la institución educativa.",
-          estudiantes: "Mis profesores me dejan actividades para hacer en casa, las cuales necesitan el apoyo de mis acudientes.",
-          acudientes: "Los profesores promueven actividades para que apoye en su proceso de aprendizaje a los estudiantes que tengo a cargo."
-        }
-      }
-    ]
-  },
-  practicas_pedagogicas: {
-    title: "PRÁCTICAS PEDAGÓGICAS",
-    items: [
-      {
-        displayText: "Los intereses y las necesidades de los estudiantes son tenidos en cuenta en la planeación de las clases.",
-        questionMappings: {
-          docentes: "Cuando preparo mis clases tengo en cuenta los intereses y necesidades de los estudiantes.",
-          estudiantes: "Los profesores tienen en cuenta mis intereses y afinidades para escoger lo que vamos a hacer en clase.",
-          acudientes: "Los profesores tienen en cuenta los intereses y necesidades de los estudiantes para escoger los temas que se van a tratar en clase."
-        }
-      }
-    ]
-  },
-  convivencia: {
-    title: "CONVIVENCIA",
-    items: [
-      {
-        displayText: "Todos los estudiantes son tratados con respeto independiente de sus creencias religiosas, género, orientación sexual, etnia y capacidades o talentos.",
-        questionMappings: {
-          docentes: "En el colegio mis estudiantes son tratados con respeto, independiente de sus creencias religiosas, género, orientación sexual, grupo étnico y capacidades o talentos de los demás.",
-          estudiantes: "En el colegio mis compañeros y yo somos tratados con respeto sin importar nuestras creencias religiosas, género, orientación sexual, grupo étnico y capacidades o talentos.",
-          acudientes: "En el colegio los estudiantes son respetuosos y solidarios entre ellos, comprendiendo y aceptando las creencias religiosas, el género, la orientación sexual, el grupo étnico y las capacidades o talentos de los demás."
-        }
-      }
-    ]
-  }
+// Configure PostgreSQL connection (if DATABASE_URL is provided)
+let pool;
+const useMockData = !process.env.DATABASE_URL;
+
+if (process.env.DATABASE_URL) {
+  console.log('DATABASE_URL is set. Attempting to connect to database...');
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+  
+  // Test database connection
+  pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+      console.error('Database connection error:', err.stack);
+    } else {
+      console.log('Database connected successfully');
+    }
+  });
+} else {
+  console.log('DATABASE_URL not set. Using mock data for all operations.');
+}
+
+// Access tokens - simplified to avoid special characters
+const ACCESS_TOKENS = {
+  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
+  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
+  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
 };
 
-// Calculate frequency percentages for a specific question
-async function calculateFrequency(tableName, question, sectionColumn, school) {
-  if (!question || question === 'NA') {
-    return { S: 0, A: 0, N: 0 };
-  }
+// MIME type helper
+const getMimeType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  const mimeTypes = {
+    '.html': 'text/html',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.pdf': 'application/pdf',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.otf': 'font/otf'
+  };
+  return mimeTypes[ext] || 'application/octet-stream';
+};
 
-  try {
-    console.log(`Calculating frequency for ${tableName}, question: "${question}", column: ${sectionColumn}${school ? `, school: ${school}` : ''}`);
+// Token validation middleware
+const validateToken = (app) => {
+  return (req, res, next) => {
+    const pathParts = req.path.split('/');
+    if (pathParts.length < 2) return res.status(403).send('Access Denied');
     
-    let query = `
-      SELECT 
-        jsonb_extract_path_text(${sectionColumn}, $1) as rating,
-        COUNT(*) as count
-      FROM ${tableName}
-      WHERE jsonb_extract_path_text(${sectionColumn}, $1) IS NOT NULL
-    `;
-    
-    const params = [question];
-    
-    // Add school filter if provided
-    if (school) {
-      query += ` AND institucion_educativa = $2`;
-      params.push(school);
+    const token = pathParts[1];
+    if (token !== ACCESS_TOKENS[app]) {
+      return res.status(403).send('Access Denied: Invalid Token');
     }
-    
-    query += `
-      GROUP BY jsonb_extract_path_text(${sectionColumn}, $1)
-    `;
-    
-    const result = await pool.query(query, params);
-    
-    if (result.rows.length === 0) {
-      console.log(`No ratings found for question: ${question}`);
-      return { S: 0, A: 0, N: 0 };
-    }
-    
-    let total = 0;
-    const counts = { S: 0, A: 0, N: 0 };
-    
-    result.rows.forEach(row => {
-      const count = parseInt(row.count);
-      total += count;
+    next();
+  };
+};
+
+// Helper function to safely serve static files
+const safeServeStaticFile = (filePath, fallbackPath, contentType, res) => {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      console.error(`Error reading file ${filePath}: ${err.message}`);
       
-      const rating = row.rating.toLowerCase();
-      if (rating.includes('siempre')) {
-        counts.S += count;
-      } else if (rating.includes('veces')) {
-        counts.A += count;
-      } else if (rating.includes('nunca')) {
-        counts.N += count;
+      // Try fallback path if provided
+      if (fallbackPath) {
+        fs.readFile(fallbackPath, (fallbackErr, fallbackData) => {
+          if (fallbackErr) {
+            console.error(`Error reading fallback file ${fallbackPath}: ${fallbackErr.message}`);
+            return res.status(404).send('File not found');
+          }
+          
+          res.setHeader('Content-Type', contentType);
+          res.send(fallbackData);
+        });
+        return;
       }
-    });
-    
-    if (total === 0) {
-      return { S: 0, A: 0, N: 0 };
+      
+      return res.status(404).send('File not found');
     }
     
-    return {
-      S: Math.round((counts.S / total) * 100),
-      A: Math.round((counts.A / total) * 100),
-      N: Math.round((counts.N / total) * 100)
-    };
-  } catch (error) {
-    console.error(`Error calculating frequency for ${tableName}, question: ${question}:`, error);
-    return { S: 0, A: 0, N: 0 };
+    res.setHeader('Content-Type', contentType);
+    res.send(data);
+  });
+};
+
+// Mock data for schools (expanded for better testing)
+const mockSchools = [
+  "Colegio Ejemplo 1",
+  "Colegio Ejemplo 2",
+  "Colegio Nacional",
+  "Institución Educativa Principal",
+  "Escuela Básica",
+  "Colegio San José",
+  "Institución Educativa Misericordia",
+  "Colegio Santa María",
+  "Colegio Misioneros del Saber",
+  "Escuela Misión Pedagógica",
+  "Liceo Mixto Departamental",
+  "Colegio Departamental",
+  "Instituto Pedagógico Nacional",
+  "Colegio San Francisco de Asís"
+];
+
+// stats application
+app.use('/stats/:token', (req, res, next) => {
+  if (req.params.token !== ACCESS_TOKENS['stats']) {
+    return res.status(403).send('Access Denied: Invalid Token');
   }
-}
+  next();
+}, express.static(path.join(__dirname, 'Stats', 'frontend', 'build')));
+
+// Catch-all for client-side routing in React apps
+app.get('/:token', (req, res) => {
+  const token = req.params.token;
+  let appPath;
+  
+  if (token === ACCESS_TOKENS.docentes) {
+    appPath = path.join(__dirname, 'form-docentes', 'build', 'index.html');
+  } else if (token === ACCESS_TOKENS.acudientes) {
+    appPath = path.join(__dirname, 'form-acudientes', 'build', 'index.html');
+  } else if (token === ACCESS_TOKENS.estudiantes) {
+    appPath = path.join(__dirname, 'form-estudiantes', 'build', 'index.html');
+  } else {
+    return res.status(403).send('Access Denied: Invalid Token');
+  }
+  
+  safeServeStaticFile(appPath, null, 'text/html', res);
+});
 
 // Start server
 app.listen(port, '0.0.0.0', () => {
