@@ -34,6 +34,37 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    headers:
+      - path: /*.js
+        name: Content-Type
+        value: application/javascript
+      - path: /*.css
+        name: Content-Type
+        value: text/css
+      - path: /*.json
+        name: Content-Type
+        value: application/json
+      - path: /*.png
+        name: Content-Type
+        value: image/png
+      - path: /*.jpg
+        name: Content-Type
+        value: image/jpeg
+      - path: /*.jpeg
+        name: Content-Type
+        value: image/jpeg
+      - path: /*.svg
+        name: Content-Type
+        value: image/svg+xml
+      - path: /*.woff
+        name: Content-Type
+        value: font/woff
+      - path: /*.woff2
+        name: Content-Type
+        value: font/woff2
+      - path: /*.ttf
+        name: Content-Type
+        value: font/ttf
 
   # PostgreSQL Database
   - type: pserv
