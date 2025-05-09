@@ -689,4 +689,49 @@ async function calculateFrequency(tableName, question, sectionColumn, school) {
     
     // Add school filter if provided
     if (school) {
-      query += `
+      query += ` AND institucion_educativa = $2`;
+      params.push(school);
+    }
+    
+    query += `
+      GROUP BY jsonb_extract_path_text(${sectionColumn}, $1)
+    `;
+    
+    const result = await pool.query(query, params);
+    
+    if (result.rows.length === 0) {
+      console.log(`No ratings found for question: ${question}`);
+      return { S: 0, A: 0, N: 0 };
+    }
+    
+    let total = 0;
+    const counts = { S: 0, A: 0, N: 0 };
+    
+    result.rows.forEach(row => {
+      const count = parseInt(row.count);
+      total += count;
+      
+      const rating = row.rating.toLowerCase();
+      if (rating.includes('siempre')) {
+        counts.S += count;
+      } else if (rating.includes('veces')) {
+        counts.A += count;
+      } else if (rating.includes('nunca')) {
+        counts.N += count;
+      }
+    });
+    
+    if (total === 0) {
+      return { S: 0, A: 0, N: 0 };
+    }
+    
+    return {
+      S: Math.round((counts.S / total) * 100),
+      A: Math.round((counts.A / total) * 100),
+      N: Math.round((counts.N / total) * 100)
+    };
+  } catch (error) {
+    console.error(`Error calculating frequency for ${tableName}, question: ${question}:`, error);
+    return { S: 0, A: 0, N: 0 };
+  }
+}
