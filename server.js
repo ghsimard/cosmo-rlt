@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
 const cors = require('cors');
+const serveStatic = require('serve-static');
 require('dotenv').config();
 
 const app = express();
@@ -42,7 +43,7 @@ app.get('/health', (req, res) => {
 });
 
 // Serve static files with proper MIME types
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', serveStatic(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
@@ -52,7 +53,7 @@ app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirna
   }
 }));
 
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', serveStatic(path.join(__dirname, 'form-acudientes/build'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
@@ -62,7 +63,7 @@ app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__di
   }
 }));
 
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', serveStatic(path.join(__dirname, 'form-estudiantes/build'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
@@ -73,7 +74,7 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
 }));
 
 // Serve public files
-app.use(express.static('public'));
+app.use(serveStatic('public'));
 
 // Debug middleware
 app.use((req, res, next) => {
@@ -725,326 +726,4 @@ async function calculateFrequency(tableName, question, sectionColumn, school) {
         COUNT(*) as count
       FROM ${tableName}
       WHERE jsonb_extract_path_text(${sectionColumn}, $1) IS NOT NULL
-    `;
-    
-    const params = [question];
-    
-    // Add school filter if provided
-    if (school) {
-      query += ` AND institucion_educativa = $2`;
-      params.push(school);
-    }
-    
-    query += `
-      GROUP BY jsonb_extract_path_text(${sectionColumn}, $1)
-    `;
-    
-    const result = await pool.query(query, params);
-    
-    if (result.rows.length === 0) {
-      console.log(`No ratings found for question: ${question}`);
-      return { S: 0, A: 0, N: 0 };
-    }
-    
-    let total = 0;
-    const counts = { S: 0, A: 0, N: 0 };
-    
-    result.rows.forEach(row => {
-      const count = parseInt(row.count);
-      total += count;
-      
-      const rating = row.rating.toLowerCase();
-      if (rating.includes('siempre')) {
-        counts.S += count;
-      } else if (rating.includes('veces')) {
-        counts.A += count;
-      } else if (rating.includes('nunca')) {
-        counts.N += count;
-      }
-    });
-    
-    if (total === 0) {
-      return { S: 0, A: 0, N: 0 };
-    }
-    
-    return {
-      S: Math.round((counts.S / total) * 100),
-      A: Math.round((counts.A / total) * 100),
-      N: Math.round((counts.N / total) * 100)
-    };
-  } catch (error) {
-    console.error(`Error calculating frequency for ${tableName}, question: ${question}:`, error);
-    return { S: 0, A: 0, N: 0 };
-  }
-}
-
-app.get('/api/frequency-ratings', async (req, res) => {
-  try {
-    const school = req.query.school;
-    console.log(`Handling frequency-ratings request${school ? ` for school: ${school}` : ' for all schools'}`);
-    
-    const results = [];
-    
-    // Process each section
-    for (const [sectionKey, section] of Object.entries(frequencyMappings)) {
-      const sectionData = {
-        title: section.title,
-        questions: []
-      };
-      
-      // Process each question in the section
-      for (const item of section.items) {
-        // Calculate frequencies for each form type
-        const docentesFreq = await calculateFrequency(
-          'docentes_form_submissions', 
-          item.questionMappings.docentes, 
-          sectionKey,
-          school
-        );
-        
-        const estudiantesFreq = await calculateFrequency(
-          'estudiantes_form_submissions', 
-          item.questionMappings.estudiantes, 
-          sectionKey,
-          school
-        );
-        
-        const acudientesFreq = await calculateFrequency(
-          'acudientes_form_submissions', 
-          item.questionMappings.acudientes, 
-          sectionKey,
-          school
-        );
-        
-        sectionData.questions.push({
-          displayText: item.displayText,
-          questionMappings: item.questionMappings,
-          results: {
-            docentes: docentesFreq,
-            estudiantes: estudiantesFreq,
-            acudientes: acudientesFreq
-          }
-        });
-      }
-      
-      results.push(sectionData);
-    }
-    
-    console.log(`Returning frequency data with ${results.length} sections`);
-    res.json(results);
-  } catch (error) {
-    console.error('Error handling frequency-ratings request:', error);
-    console.error('Error details:', error.message, error.stack);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
-    });
-  }
-});
-
-app.get('/api/monitoring', async (req, res) => {
-  try {
-    console.log('Handling monitoring request');
-
-    // Get actual school names from the database
-    const schoolsQuery = `
-      SELECT DISTINCT 
-        nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ as school_name,
-        nombre_s_y_apellido_s_completo_s as rector_name
-      FROM rectores
-      WHERE nombre_de_la_institucion_educativa_en_la_actualmente_desempena_ IS NOT NULL
-      ORDER BY nombre_de_la_institucion_educativa_en_la_actualmente_desempena_
-    `;
-    
-    console.log('Executing schools query for monitoring endpoint');
-    const schoolsResult = await pool.query(schoolsQuery);
-    console.log(`Found ${schoolsResult.rowCount} schools`);
-    
-    // For each school, count submissions in each form table
-    const monitoringData = await Promise.all(
-      schoolsResult.rows.map(async (school) => {
-        // Count submissions for each form type
-        try {
-          const countQueries = [
-            pool.query(`
-              SELECT COUNT(*) as count 
-              FROM docentes_form_submissions 
-              WHERE institucion_educativa = $1
-            `, [school.school_name]),
-            pool.query(`
-              SELECT COUNT(*) as count 
-              FROM estudiantes_form_submissions 
-              WHERE institucion_educativa = $1
-            `, [school.school_name]),
-            pool.query(`
-              SELECT COUNT(*) as count 
-              FROM acudientes_form_submissions 
-              WHERE institucion_educativa = $1
-            `, [school.school_name])
-          ];
-          
-          const [docentesResult, estudiantesResult, acudientesResult] = await Promise.all(countQueries);
-          
-          return {
-            schoolName: school.school_name,
-            rectorName: school.rector_name || 'No especificado',
-            submissions: {
-              docentes: parseInt(docentesResult.rows[0].count) || 0,
-              estudiantes: parseInt(estudiantesResult.rows[0].count) || 0,
-              acudientes: parseInt(acudientesResult.rows[0].count) || 0
-            }
-          };
-        } catch (countError) {
-          console.error(`Error counting submissions for school ${school.school_name}:`, countError);
-          return {
-            schoolName: school.school_name,
-            rectorName: school.rector_name || 'No especificado',
-            submissions: {
-              docentes: 0,
-              estudiantes: 0,
-              acudientes: 0
-            }
-          };
-        }
-      })
-    );
-    
-    console.log(`Returning monitoring data for ${monitoringData.length} schools`);
-    res.json(monitoringData);
-  } catch (error) {
-    console.error('Error handling monitoring request:', error);
-    console.error('Error details:', error.message, error.stack);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
-    });
-  }
-});
-
-// Add API endpoints for grade distributions needed by the Stats app
-app.get('/api/test-grades', async (req, res) => {
-  try {
-    const school = req.query.school;
-    console.log(`Handling test-grades request for school: ${school}`);
-    
-    // This endpoint provides grade distribution data for docentes and acudientes
-    // Format expected by the Stats app:
-    // [{ label: 'Grade Name', value: percentage, color: 'color-code' }]
-    
-    // Use mock data for now, but in production this would query the actual submissions
-    const mockGradesData = [
-      { label: '1°', value: 15, color: '#4285F4' },
-      { label: '2°', value: 12, color: '#34A853' },
-      { label: '3°', value: 14, color: '#FBBC05' },
-      { label: '4°', value: 16, color: '#EA4335' },
-      { label: '5°', value: 13, color: '#8F44AD' },
-      { label: '6°', value: 8, color: '#3498DB' },
-      { label: '7°', value: 7, color: '#1ABC9C' },
-      { label: '8°', value: 5, color: '#F39C12' },
-      { label: '9°', value: 4, color: '#D35400' },
-      { label: '10°', value: 3, color: '#C0392B' },
-      { label: '11°', value: 3, color: '#7F8C8D' }
-    ];
-    
-    // Wrap the data array in an object with a 'data' property
-    res.json({
-      school: school,
-      data: mockGradesData,
-      debug: {
-        rawData: []
-      }
-    });
-  } catch (error) {
-    console.error('Error handling test-grades request:', error);
-    console.error('Error details:', error.message, error.stack);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
-    });
-  }
-});
-
-app.get('/api/estudiantes-grades', async (req, res) => {
-  try {
-    const school = req.query.school;
-    console.log(`Handling estudiantes-grades request for school: ${school}`);
-    
-    // This endpoint provides grade distribution data for estudiantes
-    // Format expected by the Stats app:
-    // [{ label: 'Grade Name', value: percentage, color: 'color-code' }]
-    
-    // Use mock data for now, but in production this would query the actual submissions
-    const mockEstudiantesGrades = [
-      { label: '5°', value: 20, color: '#4285F4' },
-      { label: '8°', value: 25, color: '#34A853' },
-      { label: '9°', value: 20, color: '#FBBC05' },
-      { label: '10°', value: 20, color: '#EA4335' },
-      { label: '11°', value: 15, color: '#8F44AD' }
-    ];
-    
-    // Wrap the data array in an object with a 'data' property
-    res.json({
-      school: school,
-      data: mockEstudiantesGrades,
-      debug: {
-        rawData: []
-      }
-    });
-  } catch (error) {
-    console.error('Error handling estudiantes-grades request:', error);
-    console.error('Error details:', error.message, error.stack);
-    res.status(500).json({ 
-      error: 'Internal server error',
-      message: error.message 
-    });
-  }
-});
-
-// Test database connection endpoint
-app.get('/api/test-db', async (req, res) => {
-  try {
-    if (!pool) {
-      return res.status(500).json({ error: 'Database connection not configured' });
-    }
-    
-    const client = await pool.connect();
-    try {
-      const result = await client.query('SELECT NOW() as current_time');
-      res.json({
-        status: 'success',
-        message: 'Database connection successful',
-        timestamp: result.rows[0].current_time
-      });
-    } finally {
-      client.release();
-    }
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Database connection failed',
-      error: error.message
-    });
-  }
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Server error:', err.stack);
-  
-  // Don't expose error details in production
-  if (process.env.NODE_ENV === 'production') {
-    res.status(500).send('Internal Server Error');
-  } else {
-    res.status(500).send(`Internal Server Error: ${err.message}`);
-  }
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Simplified COSMO server running on port ${port}`);
-  console.log('Access tokens:');
-  Object.entries(ACCESS_TOKENS).forEach(([app, token]) => {
-    console.log(`${app}: "${token}"`);
-  });
-}); 
+    `
