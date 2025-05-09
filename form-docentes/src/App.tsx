@@ -183,7 +183,12 @@ function App() {
       try {
         // Use the correct base URL for API calls
         const baseUrl = window.location.origin;
-        const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`);
+        const response = await fetch(`${baseUrl}/api/search-schools?q=${encodeURIComponent(value)}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const suggestions = await response.json();
           if (suggestions.length > 0) {
