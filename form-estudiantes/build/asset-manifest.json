@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/estudiantes/EstToken789/static/css/main.b6ec4637.css",
-    "main.js": "/estudiantes/EstToken789/static/js/main.2ba9970b.js",
+    "main.js": "/estudiantes/EstToken789/static/js/main.4327d5fc.js",
     "index.html": "/estudiantes/EstToken789/index.html",
     "main.b6ec4637.css.map": "/estudiantes/EstToken789/static/css/main.b6ec4637.css.map",
-    "main.2ba9970b.js.map": "/estudiantes/EstToken789/static/js/main.2ba9970b.js.map"
+    "main.4327d5fc.js.map": "/estudiantes/EstToken789/static/js/main.4327d5fc.js.map"
   },
   "entrypoints": [
     "static/css/main.b6ec4637.css",
-    "static/js/main.2ba9970b.js"
+    "static/js/main.4327d5fc.js"
   ]
 }

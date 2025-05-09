@@ -23,6 +23,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Serve static files for each form application
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
+
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Configure PostgreSQL connection (if DATABASE_URL is provided)
 let pool;
 const useMockData = !process.env.DATABASE_URL;
@@ -48,9 +56,9 @@ if (process.env.DATABASE_URL) {
 
 // Access tokens - simplified to avoid special characters
 const ACCESS_TOKENS = {
-  'docentes': process.env.DOCENTES_TOKEN || 'DocToken123',
-  'acudientes': process.env.ACUDIENTES_TOKEN || 'AcuToken456',
-  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'EstToken789'
+  'docentes': process.env.DOCENTES_TOKEN || 'cosmo-doc-o185zfu2c-5xotms',
+  'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
+  'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
 };
 
 // MIME type helper
@@ -479,31 +487,6 @@ app.get('/coordinadores.jpeg', (req, res) => {
   const imagePath = path.join(__dirname, 'form-docentes', 'public', 'coordinadores.jpeg');
   safeServeStaticFile(imagePath, null, 'image/jpeg', res);
 });
-
-// Serve form applications with token validation
-// docentes application
-app.use('/docentes/:token', (req, res, next) => {
-  if (req.params.token !== ACCESS_TOKENS['docentes']) {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  next();
-}, express.static(path.join(__dirname, 'form-docentes', 'build')));
-
-// acudientes application
-app.use('/acudientes/:token', (req, res, next) => {
-  if (req.params.token !== ACCESS_TOKENS['acudientes']) {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  next();
-}, express.static(path.join(__dirname, 'form-acudientes', 'build')));
-
-// estudiantes application
-app.use('/estudiantes/:token', (req, res, next) => {
-  if (req.params.token !== ACCESS_TOKENS['estudiantes']) {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  next();
-}, express.static(path.join(__dirname, 'form-estudiantes', 'build')));
 
 // stats application
 app.use('/stats/:token', (req, res, next) => {
