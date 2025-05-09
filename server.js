@@ -735,3 +735,12 @@ async function calculateFrequency(tableName, question, sectionColumn, school) {
     return { S: 0, A: 0, N: 0 };
   }
 }
+
+// Start server
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running on port ${port}`);
+  console.log('Access tokens:');
+  Object.entries(ACCESS_TOKENS).forEach(([app, token]) => {
+    console.log(`${app}: "${token}"`);
+  });
+});
