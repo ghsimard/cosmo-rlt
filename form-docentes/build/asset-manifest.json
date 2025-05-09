@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/docentes/DocToken123/static/css/main.21002bd6.css",
-    "main.js": "/docentes/DocToken123/static/js/main.23366533.js",
-    "static/js/453.3efecf6a.chunk.js": "/docentes/DocToken123/static/js/453.3efecf6a.chunk.js",
-    "index.html": "/docentes/DocToken123/index.html",
-    "main.21002bd6.css.map": "/docentes/DocToken123/static/css/main.21002bd6.css.map",
-    "main.23366533.js.map": "/docentes/DocToken123/static/js/main.23366533.js.map",
-    "453.3efecf6a.chunk.js.map": "/docentes/DocToken123/static/js/453.3efecf6a.chunk.js.map"
+    "main.css": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/css/main.21002bd6.css",
+    "main.js": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.283b1ee7.js",
+    "static/js/453.3efecf6a.chunk.js": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/453.3efecf6a.chunk.js",
+    "index.html": "/docentes/cosmo-doc-o185zfu2c-5xotms/index.html",
+    "main.21002bd6.css.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/css/main.21002bd6.css.map",
+    "main.283b1ee7.js.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/main.283b1ee7.js.map",
+    "453.3efecf6a.chunk.js.map": "/docentes/cosmo-doc-o185zfu2c-5xotms/static/js/453.3efecf6a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.21002bd6.css",
-    "static/js/main.23366533.js"
+    "static/js/main.283b1ee7.js"
   ]
 }

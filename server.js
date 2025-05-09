@@ -39,14 +39,17 @@ app.use((req, res, next) => {
 
 // Catch-all for client-side routing in React apps
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/*', (req, res) => {
+  console.log('Serving docentes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-docentes/build/index.html'));
 });
 
 app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*', (req, res) => {
+  console.log('Serving acudientes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-acudientes/build/index.html'));
 });
 
 app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*', (req, res) => {
+  console.log('Serving estudiantes app for path:', req.path);
   res.sendFile(path.join(__dirname, 'form-estudiantes/build/index.html'));
 });
 
