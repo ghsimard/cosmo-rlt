@@ -970,7 +970,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Simplified COSMO server running on port ${port}`);
   console.log('Access tokens:');
   Object.entries(ACCESS_TOKENS).forEach(([app, token]) => {

@@ -3,38 +3,34 @@ services:
   - type: web
     name: COSMORLT
     env: node
-    buildCommand: |
-      cd form-docentes && npm install && npm run build && \
-      cd ../form-acudientes && npm install && npm run build && \
-      cd ../form-estudiantes && npm install && npm run build && \
-      cd .. && npm install
+    buildCommand: npm install && npm run build
     startCommand: node server.js
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
-        value: postgres://cosmo_rlt_user:Gy5Hs5Hs5Hs5Hs5@dpg-d054t79r0fns73d2loeg-a.oregon-postgres.render.com:5432/cosmo_rlt
+        sync: false
       - key: DOCENTES_TOKEN
         value: cosmo-doc-o185zfu2c-5xotms
       - key: ACUDIENTES_TOKEN
         value: cosmo-acu-js4n5cy8ar-f0uax8
       - key: ESTUDIANTES_TOKEN
         value: cosmo-est-o7lmi20mfwb-o9f06j
-      - key: NODE_ENV
-        value: production
     healthCheckPath: /test
     autoDeploy: true
     routes:
       - type: rewrite
-        source: /docentes/cosmo-doc-o185zfu2c-5xotms/*
-        destination: /docentes/cosmo-doc-o185zfu2c-5xotms/*
-      - type: rewrite
-        source: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*
-        destination: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/*
-      - type: rewrite
-        source: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*
-        destination: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/*
-      - type: rewrite
         source: /api/*
         destination: /api/*
+      - type: rewrite
+        source: /docentes/*
+        destination: /docentes/*
+      - type: rewrite
+        source: /acudientes/*
+        destination: /acudientes/*
+      - type: rewrite
+        source: /estudiantes/*
+        destination: /estudiantes/*
       - type: rewrite
         source: /*
         destination: /index.html
