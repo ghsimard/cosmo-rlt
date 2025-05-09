@@ -67,24 +67,71 @@ app.use(staticFileMiddleware);
 
 // Serve static files with specific routes first
 app.get('/docentes/cosmo-doc-o185zfu2c-5xotms/static/*', (req, res, next) => {
-  const filePath = path.join(__dirname, 'form-docentes/build', req.path.replace('/docentes/cosmo-doc-o185zfu2c-5xotms', ''));
-  res.sendFile(filePath);
+  const staticPath = req.path.replace('/docentes/cosmo-doc-o185zfu2c-5xotms', '');
+  const filePath = path.join(__dirname, 'form-docentes/build', staticPath);
+  console.log('Serving docentes static file:', filePath);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving docentes static file:', err);
+      next(err);
+    }
+  });
 });
 
 app.get('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/*', (req, res, next) => {
-  const filePath = path.join(__dirname, 'form-acudientes/build', req.path.replace('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', ''));
-  res.sendFile(filePath);
+  const staticPath = req.path.replace('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', '');
+  const filePath = path.join(__dirname, 'form-acudientes/build', staticPath);
+  console.log('Serving acudientes static file:', filePath);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving acudientes static file:', err);
+      next(err);
+    }
+  });
 });
 
 app.get('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/*', (req, res, next) => {
-  const filePath = path.join(__dirname, 'form-estudiantes/build', req.path.replace('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', ''));
-  res.sendFile(filePath);
+  const staticPath = req.path.replace('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', '');
+  const filePath = path.join(__dirname, 'form-estudiantes/build', staticPath);
+  console.log('Serving estudiantes static file:', filePath);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error serving estudiantes static file:', err);
+      next(err);
+    }
+  });
 });
 
-// Serve other static files
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
+// Serve other static files with proper MIME types
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
 
 // Serve public files
 app.use(express.static('public'));
