@@ -86,13 +86,138 @@ app.get('*/static/js/*.js', (req, res, next) => {
   next();
 });
 
-// Serve static files for each form application
-app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
-app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
-app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build')));
+// Serve static files for each form application with explicit MIME types
+app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
+    }
+  }
+}));
+
+app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
+    }
+  }
+}));
+
+app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
+    }
+  }
+}));
 
 // Serve static files from the root directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
+    }
+  }
+}));
+
+// Serve special image files
+app.get('/rectores.jpeg', (req, res) => {
+  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'rectores.jpeg');
+  res.sendFile(imagePath, {
+    headers: {
+      'Content-Type': 'image/jpeg'
+    }
+  });
+});
+
+app.get('/coordinadores.jpeg', (req, res) => {
+  const imagePath = path.join(__dirname, 'form-docentes', 'public', 'coordinadores.jpeg');
+  res.sendFile(imagePath, {
+    headers: {
+      'Content-Type': 'image/jpeg'
+    }
+  });
+});
 
 // API routes
 app.get('/api/search-schools', async (req, res) => {
@@ -491,115 +616,6 @@ const ACCESS_TOKENS = {
   'acudientes': process.env.ACUDIENTES_TOKEN || 'cosmo-acu-js4n5cy8ar-f0uax8',
   'estudiantes': process.env.ESTUDIANTES_TOKEN || 'cosmo-est-o7lmi20mfwb-o9f06j'
 };
-
-// MIME type helper
-const getMimeType = (filename) => {
-  const ext = path.extname(filename).toLowerCase();
-  const mimeTypes = {
-    '.html': 'text/html',
-    '.js': 'application/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon',
-    '.pdf': 'application/pdf',
-    '.woff': 'font/woff',
-    '.woff2': 'font/woff2',
-    '.ttf': 'font/ttf',
-    '.otf': 'font/otf'
-  };
-  return mimeTypes[ext] || 'application/octet-stream';
-};
-
-// Token validation middleware
-const validateToken = (app) => {
-  return (req, res, next) => {
-    const pathParts = req.path.split('/');
-    if (pathParts.length < 2) return res.status(403).send('Access Denied');
-    
-    const token = pathParts[1];
-    if (token !== ACCESS_TOKENS[app]) {
-      return res.status(403).send('Access Denied: Invalid Token');
-    }
-    next();
-  };
-};
-
-// Helper function to safely serve static files
-const safeServeStaticFile = (filePath, fallbackPath, contentType, res) => {
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      console.error(`Error reading file ${filePath}: ${err.message}`);
-      
-      // Try fallback path if provided
-      if (fallbackPath) {
-        fs.readFile(fallbackPath, (fallbackErr, fallbackData) => {
-          if (fallbackErr) {
-            console.error(`Error reading fallback file ${fallbackPath}: ${fallbackErr.message}`);
-            return res.status(404).send('File not found');
-          }
-          
-          res.setHeader('Content-Type', contentType);
-          res.send(fallbackData);
-        });
-        return;
-      }
-      
-      return res.status(404).send('File not found');
-    }
-    
-    res.setHeader('Content-Type', contentType);
-    res.send(data);
-  });
-};
-
-// Mock data for schools (expanded for better testing)
-const mockSchools = [
-  "Colegio Ejemplo 1",
-  "Colegio Ejemplo 2",
-  "Colegio Nacional",
-  "Institución Educativa Principal",
-  "Escuela Básica",
-  "Colegio San José",
-  "Institución Educativa Misericordia",
-  "Colegio Santa María",
-  "Colegio Misioneros del Saber",
-  "Escuela Misión Pedagógica",
-  "Liceo Mixto Departamental",
-  "Colegio Departamental",
-  "Instituto Pedagógico Nacional",
-  "Colegio San Francisco de Asís"
-];
-
-// stats application
-app.use('/stats/:token', (req, res, next) => {
-  if (req.params.token !== ACCESS_TOKENS['stats']) {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  next();
-}, express.static(path.join(__dirname, 'Stats', 'frontend', 'build')));
-
-// Catch-all for client-side routing in React apps
-app.get('/:token', (req, res) => {
-  const token = req.params.token;
-  let appPath;
-  
-  if (token === ACCESS_TOKENS.docentes) {
-    appPath = path.join(__dirname, 'form-docentes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.acudientes) {
-    appPath = path.join(__dirname, 'form-acudientes', 'build', 'index.html');
-  } else if (token === ACCESS_TOKENS.estudiantes) {
-    appPath = path.join(__dirname, 'form-estudiantes', 'build', 'index.html');
-  } else {
-    return res.status(403).send('Access Denied: Invalid Token');
-  }
-  
-  safeServeStaticFile(appPath, null, 'text/html', res);
-});
 
 // Start server
 app.listen(port, '0.0.0.0', () => {
