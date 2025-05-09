@@ -23,11 +23,12 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     res.setHeader('Content-Security-Policy', 
       "default-src 'self'; " +
-      "connect-src 'self' http://localhost:3000 https://*.onrender.com https://cosmorlt.onrender.com; " +
-      "img-src 'self' data:; " +
+      "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com; " +
+      "img-src 'self' data: https:; " +
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "font-src 'self' data:;"
+      "font-src 'self' data:; " +
+      "frame-ancestors 'none';"
     );
     next();
   });
@@ -37,10 +38,11 @@ if (process.env.NODE_ENV === 'production') {
     res.setHeader('Content-Security-Policy', 
       "default-src 'self' http://localhost:*; " +
       "connect-src 'self' http://localhost:* https://*.onrender.com https://cosmorlt.onrender.com; " +
-      "img-src 'self' data:; " +
+      "img-src 'self' data: https:; " +
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "font-src 'self' data:;"
+      "font-src 'self' data:; " +
+      "frame-ancestors 'none';"
     );
     next();
   });
