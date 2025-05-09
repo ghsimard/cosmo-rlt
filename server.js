@@ -13,6 +13,17 @@ const port = process.env.PORT || 3000;
 // Enable compression
 app.use(compression());
 
+// MIME type middleware - must be before other middleware
+app.use((req, res, next) => {
+  const url = req.url;
+  if (url.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (url.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  }
+  next();
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -79,16 +90,31 @@ console.log('- Estudiantes:', path.join(__dirname, 'form-estudiantes/build'));
 // Serve static files for each app with detailed logging
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', (req, res, next) => {
   console.log('Serving docentes file:', req.path);
+  if (req.path.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (req.path.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  }
   serveStatic(path.join(__dirname, 'form-docentes/build'), staticOptions)(req, res, next);
 });
 
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', (req, res, next) => {
   console.log('Serving acudientes file:', req.path);
+  if (req.path.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (req.path.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  }
   serveStatic(path.join(__dirname, 'form-acudientes/build'), staticOptions)(req, res, next);
 });
 
 app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', (req, res, next) => {
   console.log('Serving estudiantes file:', req.path);
+  if (req.path.endsWith('.js')) {
+    res.setHeader('Content-Type', 'application/javascript');
+  } else if (req.path.endsWith('.css')) {
+    res.setHeader('Content-Type', 'text/css');
+  }
   serveStatic(path.join(__dirname, 'form-estudiantes/build'), staticOptions)(req, res, next);
 });
 
