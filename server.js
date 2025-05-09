@@ -74,126 +74,84 @@ app.get('/test', (req, res) => {
 // Serve static files for each form application
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, filePath) => {
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.js':
-        res.setHeader('Content-Type', 'application/javascript');
-        break;
-      case '.css':
-        res.setHeader('Content-Type', 'text/css');
-        break;
-      case '.html':
-        res.setHeader('Content-Type', 'text/html');
-        break;
-      case '.json':
-        res.setHeader('Content-Type', 'application/json');
-        break;
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.woff':
-        res.setHeader('Content-Type', 'font/woff');
-        break;
-      case '.woff2':
-        res.setHeader('Content-Type', 'font/woff2');
-        break;
-      case '.ttf':
-        res.setHeader('Content-Type', 'font/ttf');
-        break;
-      case '.otf':
-        res.setHeader('Content-Type', 'font/otf');
-        break;
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
 
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
   setHeaders: (res, filePath) => {
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.js':
-        res.setHeader('Content-Type', 'application/javascript');
-        break;
-      case '.css':
-        res.setHeader('Content-Type', 'text/css');
-        break;
-      case '.html':
-        res.setHeader('Content-Type', 'text/html');
-        break;
-      case '.json':
-        res.setHeader('Content-Type', 'application/json');
-        break;
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.woff':
-        res.setHeader('Content-Type', 'font/woff');
-        break;
-      case '.woff2':
-        res.setHeader('Content-Type', 'font/woff2');
-        break;
-      case '.ttf':
-        res.setHeader('Content-Type', 'font/ttf');
-        break;
-      case '.otf':
-        res.setHeader('Content-Type', 'font/otf');
-        break;
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
 
 app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
   setHeaders: (res, filePath) => {
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.js':
-        res.setHeader('Content-Type', 'application/javascript');
-        break;
-      case '.css':
-        res.setHeader('Content-Type', 'text/css');
-        break;
-      case '.html':
-        res.setHeader('Content-Type', 'text/html');
-        break;
-      case '.json':
-        res.setHeader('Content-Type', 'application/json');
-        break;
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.woff':
-        res.setHeader('Content-Type', 'font/woff');
-        break;
-      case '.woff2':
-        res.setHeader('Content-Type', 'font/woff2');
-        break;
-      case '.ttf':
-        res.setHeader('Content-Type', 'font/ttf');
-        break;
-      case '.otf':
-        res.setHeader('Content-Type', 'font/otf');
-        break;
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
@@ -201,42 +159,28 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
-    const ext = path.extname(filePath).toLowerCase();
-    switch (ext) {
-      case '.js':
-        res.setHeader('Content-Type', 'application/javascript');
-        break;
-      case '.css':
-        res.setHeader('Content-Type', 'text/css');
-        break;
-      case '.html':
-        res.setHeader('Content-Type', 'text/html');
-        break;
-      case '.json':
-        res.setHeader('Content-Type', 'application/json');
-        break;
-      case '.png':
-        res.setHeader('Content-Type', 'image/png');
-        break;
-      case '.jpg':
-      case '.jpeg':
-        res.setHeader('Content-Type', 'image/jpeg');
-        break;
-      case '.svg':
-        res.setHeader('Content-Type', 'image/svg+xml');
-        break;
-      case '.woff':
-        res.setHeader('Content-Type', 'font/woff');
-        break;
-      case '.woff2':
-        res.setHeader('Content-Type', 'font/woff2');
-        break;
-      case '.ttf':
-        res.setHeader('Content-Type', 'font/ttf');
-        break;
-      case '.otf':
-        res.setHeader('Content-Type', 'font/otf');
-        break;
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html');
+    } else if (filePath.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.woff')) {
+      res.setHeader('Content-Type', 'font/woff');
+    } else if (filePath.endsWith('.woff2')) {
+      res.setHeader('Content-Type', 'font/woff2');
+    } else if (filePath.endsWith('.ttf')) {
+      res.setHeader('Content-Type', 'font/ttf');
+    } else if (filePath.endsWith('.otf')) {
+      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
