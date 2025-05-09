@@ -74,34 +74,126 @@ app.get('/test', (req, res) => {
 // Serve static files for each form application
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
+    const ext = path.extname(path).toLowerCase();
+    switch (ext) {
+      case '.js':
+        res.setHeader('Content-Type', 'application/javascript');
+        break;
+      case '.css':
+        res.setHeader('Content-Type', 'text/css');
+        break;
+      case '.html':
+        res.setHeader('Content-Type', 'text/html');
+        break;
+      case '.json':
+        res.setHeader('Content-Type', 'application/json');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      case '.woff':
+        res.setHeader('Content-Type', 'font/woff');
+        break;
+      case '.woff2':
+        res.setHeader('Content-Type', 'font/woff2');
+        break;
+      case '.ttf':
+        res.setHeader('Content-Type', 'font/ttf');
+        break;
+      case '.otf':
+        res.setHeader('Content-Type', 'font/otf');
+        break;
     }
   }
 }));
+
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build'), {
   setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
+    const ext = path.extname(path).toLowerCase();
+    switch (ext) {
+      case '.js':
+        res.setHeader('Content-Type', 'application/javascript');
+        break;
+      case '.css':
+        res.setHeader('Content-Type', 'text/css');
+        break;
+      case '.html':
+        res.setHeader('Content-Type', 'text/html');
+        break;
+      case '.json':
+        res.setHeader('Content-Type', 'application/json');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      case '.woff':
+        res.setHeader('Content-Type', 'font/woff');
+        break;
+      case '.woff2':
+        res.setHeader('Content-Type', 'font/woff2');
+        break;
+      case '.ttf':
+        res.setHeader('Content-Type', 'font/ttf');
+        break;
+      case '.otf':
+        res.setHeader('Content-Type', 'font/otf');
+        break;
     }
   }
 }));
+
 app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__dirname, 'form-estudiantes/build'), {
   setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
+    const ext = path.extname(path).toLowerCase();
+    switch (ext) {
+      case '.js':
+        res.setHeader('Content-Type', 'application/javascript');
+        break;
+      case '.css':
+        res.setHeader('Content-Type', 'text/css');
+        break;
+      case '.html':
+        res.setHeader('Content-Type', 'text/html');
+        break;
+      case '.json':
+        res.setHeader('Content-Type', 'application/json');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      case '.woff':
+        res.setHeader('Content-Type', 'font/woff');
+        break;
+      case '.woff2':
+        res.setHeader('Content-Type', 'font/woff2');
+        break;
+      case '.ttf':
+        res.setHeader('Content-Type', 'font/ttf');
+        break;
+      case '.otf':
+        res.setHeader('Content-Type', 'font/otf');
+        break;
     }
   }
 }));
@@ -109,12 +201,42 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
+    const ext = path.extname(path).toLowerCase();
+    switch (ext) {
+      case '.js':
+        res.setHeader('Content-Type', 'application/javascript');
+        break;
+      case '.css':
+        res.setHeader('Content-Type', 'text/css');
+        break;
+      case '.html':
+        res.setHeader('Content-Type', 'text/html');
+        break;
+      case '.json':
+        res.setHeader('Content-Type', 'application/json');
+        break;
+      case '.png':
+        res.setHeader('Content-Type', 'image/png');
+        break;
+      case '.jpg':
+      case '.jpeg':
+        res.setHeader('Content-Type', 'image/jpeg');
+        break;
+      case '.svg':
+        res.setHeader('Content-Type', 'image/svg+xml');
+        break;
+      case '.woff':
+        res.setHeader('Content-Type', 'font/woff');
+        break;
+      case '.woff2':
+        res.setHeader('Content-Type', 'font/woff2');
+        break;
+      case '.ttf':
+        res.setHeader('Content-Type', 'font/ttf');
+        break;
+      case '.otf':
+        res.setHeader('Content-Type', 'font/otf');
+        break;
     }
   }
 }));
