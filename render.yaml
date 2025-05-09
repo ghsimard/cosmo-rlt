@@ -16,9 +16,20 @@ services:
         value: cosmo-est-o7lmi20mfwb-o9f06j
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
     healthCheckPath: /health
     autoDeploy: true
     routes:
+      - type: rewrite
+        source: /docentes/cosmo-doc-o185zfu2c-5xotms/static/*
+        destination: /docentes/cosmo-doc-o185zfu2c-5xotms/static/*
+      - type: rewrite
+        source: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/*
+        destination: /acudientes/cosmo-acu-js4n5cy8ar-f0uax8/static/*
+      - type: rewrite
+        source: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/*
+        destination: /estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/static/*
       - type: rewrite
         source: /docentes/cosmo-doc-o185zfu2c-5xotms/*
         destination: /docentes/cosmo-doc-o185zfu2c-5xotms/index.html
@@ -65,6 +76,24 @@ services:
       - path: /*.ttf
         name: Content-Type
         value: font/ttf
+    # Add instance configuration
+    instanceType: free
+    instanceCount: 1
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    # Add scaling configuration
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    # Add health check configuration
+    healthCheck:
+      path: /health
+      interval: 30s
+      timeout: 10s
+      gracePeriod: 60s
+      maxRetries: 3
 
   # PostgreSQL Database
   - type: pserv
