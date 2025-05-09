@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const mime = require('mime');
 const { Pool } = require('pg');
 const cors = require('cors');
 require('dotenv').config();
@@ -71,31 +72,33 @@ app.get('/test', (req, res) => {
   });
 });
 
+// Custom middleware to serve static files with correct MIME types
+const serveStaticWithMime = (basePath, directory) => {
+  return (req, res, next) => {
+    const filePath = path.join(directory, req.path);
+    
+    // Check if file exists
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        return next();
+      }
+
+      // Get MIME type using mime package
+      const contentType = mime.getType(filePath) || 'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
+
+      // Stream the file
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    });
+  };
+};
+
 // Serve static files for each form application
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
-    } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (filePath.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
-    } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    } else if (filePath.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', 'image/jpeg');
-    } else if (filePath.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
-    } else if (filePath.endsWith('.woff')) {
-      res.setHeader('Content-Type', 'font/woff');
-    } else if (filePath.endsWith('.woff2')) {
-      res.setHeader('Content-Type', 'font/woff2');
-    } else if (filePath.endsWith('.ttf')) {
-      res.setHeader('Content-Type', 'font/ttf');
-    } else if (filePath.endsWith('.otf')) {
-      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
@@ -104,26 +107,6 @@ app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__di
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
-    } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (filePath.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
-    } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    } else if (filePath.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', 'image/jpeg');
-    } else if (filePath.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
-    } else if (filePath.endsWith('.woff')) {
-      res.setHeader('Content-Type', 'font/woff');
-    } else if (filePath.endsWith('.woff2')) {
-      res.setHeader('Content-Type', 'font/woff2');
-    } else if (filePath.endsWith('.ttf')) {
-      res.setHeader('Content-Type', 'font/ttf');
-    } else if (filePath.endsWith('.otf')) {
-      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
@@ -132,26 +115,6 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
-    } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (filePath.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
-    } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    } else if (filePath.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', 'image/jpeg');
-    } else if (filePath.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
-    } else if (filePath.endsWith('.woff')) {
-      res.setHeader('Content-Type', 'font/woff');
-    } else if (filePath.endsWith('.woff2')) {
-      res.setHeader('Content-Type', 'font/woff2');
-    } else if (filePath.endsWith('.ttf')) {
-      res.setHeader('Content-Type', 'font/ttf');
-    } else if (filePath.endsWith('.otf')) {
-      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
@@ -161,26 +124,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
-    } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (filePath.endsWith('.html')) {
-      res.setHeader('Content-Type', 'text/html');
-    } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
-    } else if (filePath.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
-      res.setHeader('Content-Type', 'image/jpeg');
-    } else if (filePath.endsWith('.svg')) {
-      res.setHeader('Content-Type', 'image/svg+xml');
-    } else if (filePath.endsWith('.woff')) {
-      res.setHeader('Content-Type', 'font/woff');
-    } else if (filePath.endsWith('.woff2')) {
-      res.setHeader('Content-Type', 'font/woff2');
-    } else if (filePath.endsWith('.ttf')) {
-      res.setHeader('Content-Type', 'font/ttf');
-    } else if (filePath.endsWith('.otf')) {
-      res.setHeader('Content-Type', 'font/otf');
     }
   }
 }));
