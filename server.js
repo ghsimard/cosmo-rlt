@@ -28,7 +28,8 @@ if (process.env.NODE_ENV === 'production') {
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
       "font-src 'self' data:; " +
-      "frame-ancestors 'none';"
+      "frame-ancestors 'none'; " +
+      "object-src 'none';"
     );
     next();
   });
@@ -42,7 +43,8 @@ if (process.env.NODE_ENV === 'production') {
       "style-src 'self' 'unsafe-inline'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
       "font-src 'self' data:; " +
-      "frame-ancestors 'none';"
+      "frame-ancestors 'none'; " +
+      "object-src 'none';"
     );
     next();
   });
