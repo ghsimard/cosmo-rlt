@@ -2,11 +2,14 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Add body parsing middleware
+// Middleware
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -23,6 +26,16 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Public test endpoint
+app.get('/test', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Server is running',
+    environment: process.env.NODE_ENV,
+    database: process.env.DATABASE_URL ? 'Configured' : 'Not configured'
+  });
+});
+
 // Serve static files for each form application
 app.use('/docentes/cosmo-doc-o185zfu2c-5xotms', express.static(path.join(__dirname, 'form-docentes/build')));
 app.use('/acudientes/cosmo-acu-js4n5cy8ar-f0uax8', express.static(path.join(__dirname, 'form-acudientes/build')));
@@ -31,9 +44,10 @@ app.use('/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j', express.static(path.join(__
 // Serve static files from the root directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Add debugging middleware
+// Debug middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
   next();
 });
 
@@ -905,6 +919,34 @@ app.get('/api/estudiantes-grades', async (req, res) => {
     res.status(500).json({ 
       error: 'Internal server error',
       message: error.message 
+    });
+  }
+});
+
+// Test database connection endpoint
+app.get('/api/test-db', async (req, res) => {
+  try {
+    if (!pool) {
+      return res.status(500).json({ error: 'Database connection not configured' });
+    }
+    
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT NOW() as current_time');
+      res.json({
+        status: 'success',
+        message: 'Database connection successful',
+        timestamp: result.rows[0].current_time
+      });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Database connection failed',
+      error: error.message
     });
   }
 });

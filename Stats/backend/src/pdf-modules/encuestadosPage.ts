@@ -160,10 +160,10 @@ async function getScheduleDistribution(school: string): Promise<PieChartData[]> 
     // Updated query to handle jornada as an array
     const query = `
       WITH jornada_data AS (
-        SELECT 
+      SELECT 
           unnest(jornada) as schedule
-        FROM docentes_form_submissions
-        WHERE institucion_educativa = $1
+      FROM docentes_form_submissions
+      WHERE institucion_educativa = $1
       )
       SELECT 
         schedule,

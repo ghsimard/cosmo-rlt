@@ -75,19 +75,19 @@ export const generateCoverPage = async (doc: CustomPDFKit, school?: string): Pro
     
     // Add RLT logo on the far left
     if (rltLogoPath) {
-      try {
-        doc.image(
-          rltLogoPath,
-          sideMargin,  // X position at left margin
-          logoY,
-          {
-            fit: [logoWidth, logoHeight]  // Width and height constraints
-          }
-        );
-        console.log('RLT logo added successfully');
-      } catch (logoError) {
+    try {
+      doc.image(
+        rltLogoPath,
+        sideMargin,  // X position at left margin
+        logoY,
+        {
+          fit: [logoWidth, logoHeight]  // Width and height constraints
+        }
+      );
+      console.log('RLT logo added successfully');
+    } catch (logoError) {
         console.error('Error adding RLT logo to PDF:', logoError);
-        // Draw a placeholder rectangle instead
+      // Draw a placeholder rectangle instead
         doc.rect(sideMargin, logoY, logoWidth, logoHeight)
            .stroke()
            .fontSize(12)
@@ -105,19 +105,19 @@ export const generateCoverPage = async (doc: CustomPDFKit, school?: string): Pro
 
     // Add CLT logo on the far right
     if (cltLogoPath) {
-      try {
-        doc.image(
-          cltLogoPath,
-          pageWidth - logoWidth + sideMargin/2,  // Extend into the margin area
-          logoY,
-          {
-            fit: [logoWidth, logoHeight]  // Width and height constraints
-          }
-        );
-        console.log('CLT logo added successfully');
-      } catch (logoError) {
+    try {
+      doc.image(
+        cltLogoPath,
+        pageWidth - logoWidth + sideMargin/2,  // Extend into the margin area
+        logoY,
+        {
+          fit: [logoWidth, logoHeight]  // Width and height constraints
+        }
+      );
+      console.log('CLT logo added successfully');
+    } catch (logoError) {
         console.error('Error adding CLT logo to PDF:', logoError);
-        // Draw a placeholder rectangle instead
+      // Draw a placeholder rectangle instead
         doc.rect(pageWidth - logoWidth + sideMargin/2, logoY, logoWidth, logoHeight)
            .stroke()
            .fontSize(12)

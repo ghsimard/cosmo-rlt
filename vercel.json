@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/test",
+      "dest": "server.js",
+      "continue": true
+    },
+    {
+      "src": "/api/test-db",
+      "dest": "server.js",
+      "continue": true
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "server.js"
+    },
+    {
+      "src": "/docentes/cosmo-doc-o185zfu2c-5xotms",
+      "dest": "form-docentes/build/index.html"
+    },
+    {
+      "src": "/docentes/cosmo-doc-o185zfu2c-5xotms/(.*)",
+      "dest": "form-docentes/build/$1"
+    },
+    {
+      "src": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8",
+      "dest": "form-acudientes/build/index.html"
+    },
+    {
+      "src": "/acudientes/cosmo-acu-js4n5cy8ar-f0uax8/(.*)",
+      "dest": "form-acudientes/build/$1"
+    },
+    {
+      "src": "/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j",
+      "dest": "form-estudiantes/build/index.html"
+    },
+    {
+      "src": "/estudiantes/cosmo-est-o7lmi20mfwb-o9f06j/(.*)",
+      "dest": "form-estudiantes/build/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "postgres://cosmo_rlt_user:Gy5Hs5Hs5Hs5Hs5@dpg-d054t79r0fns73d2loeg-a.oregon-postgres.render.com:5432/cosmo_rlt",
+    "DOCENTES_TOKEN": "cosmo-doc-o185zfu2c-5xotms",
+    "ACUDIENTES_TOKEN": "cosmo-acu-js4n5cy8ar-f0uax8",
+    "ESTUDIANTES_TOKEN": "cosmo-est-o7lmi20mfwb-o9f06j",
+    "NODE_ENV": "production"
+  }
+} 

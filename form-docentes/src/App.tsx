@@ -136,7 +136,7 @@ function App() {
       alert('Por favor, responda todas las preguntas de frecuencia antes de enviar el formulario.');
       return;
     }
-
+    
     // Prepare the form data for submission
     const userFormData = {
       schoolName: formData.schoolName,
@@ -228,7 +228,7 @@ function App() {
     setShowSuggestions(false);
     setSchoolSuggestions([]);
     setActiveSuggestionIndex(-1);
-    
+
     // Focus the next form section after selection
     setTimeout(() => {
       const yearsSection = document.getElementById('section-years');
@@ -292,43 +292,43 @@ function App() {
       `frequency-${section}-${rowIndex}-${colIndex}`;
 
     return (
-      <div className="space-y-8 mt-8">
-        <div>
+    <div className="space-y-8 mt-8">
+      <div>
           <h3 className="text-lg font-medium text-gray-900" id={`${section}-label`}>
-            {questionNumber}. {title}
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Seleccione con qué frecuencia ocurren las siguientes situaciones
-          </p>
-          <p className="mt-1 text-sm text-red-500">
-            * Todas las preguntas son obligatorias
-          </p>
+          {questionNumber}. {title}
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Seleccione con qué frecuencia ocurren las siguientes situaciones
+        </p>
+        <p className="mt-1 text-sm text-red-500">
+          * Todas las preguntas son obligatorias
+        </p>
           <p className="mt-1 text-sm text-gray-500">
             <i>Utilice las teclas de flecha izquierda/derecha para navegar y seleccionar opciones, y las teclas de flecha arriba/abajo para moverse entre preguntas</i>
           </p>
-        </div>
-        <div className="mt-4 overflow-x-auto">
+      </div>
+      <div className="mt-4 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200" aria-labelledby={`${section}-label`}>
-            <thead>
-              <tr>
-                <th className="w-1/3 py-3 text-left text-sm font-medium text-gray-500"></th>
-                {frequencyOptions.map((option) => (
-                  <th key={option} className="px-3 py-3 text-center text-sm font-medium text-gray-500">
-                    {option}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="w-1/3 py-3 text-left text-sm font-medium text-gray-500"></th>
+              {frequencyOptions.map((option) => (
+                <th key={option} className="px-3 py-3 text-center text-sm font-medium text-gray-500">
+                  {option}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
               {questions.map((question, rowIndex) => {
-                const isAnswered = formData[section][question] !== undefined;
-                const showError = hasAttemptedSubmit && !isAnswered;
-                return (
+              const isAnswered = formData[section][question] !== undefined;
+              const showError = hasAttemptedSubmit && !isAnswered;
+              return (
                   <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className={`py-4 text-sm align-top ${showError ? 'text-red-600' : 'text-gray-900'}`}>
-                      {question}
-                      {showError && <span className="text-red-600 ml-1">*</span>}
-                    </td>
+                  <td className={`py-4 text-sm align-top ${showError ? 'text-red-600' : 'text-gray-900'}`}>
+                    {question}
+                    {showError && <span className="text-red-600 ml-1">*</span>}
+                  </td>
                     {frequencyOptions.map((option, colIndex) => {
                       // Create a handler that both selects the option and handles keyboard navigation
                       const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -346,30 +346,30 @@ function App() {
                       };
                       
                       return (
-                        <td key={option} className="px-3 py-4 text-center">
-                          <input
-                            type="radio"
+                    <td key={option} className="px-3 py-4 text-center">
+                      <input
+                        type="radio"
                             id={getFrequencyInputId(rowIndex, colIndex)}
                             name={`frequency-${section}-${rowIndex}`}
-                            value={option}
-                            checked={formData[section][question] === option}
-                            onChange={() => handleFrequencyChange(section, question, option)}
+                        value={option}
+                        checked={formData[section][question] === option}
+                        onChange={() => handleFrequencyChange(section, question, option)}
                             onKeyDown={handleKeyDown}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                            required
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        required
                             aria-label={`${question} - ${option}`}
-                          />
-                        </td>
+                      />
+                    </td>
                       );
                     })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
-    );
+    </div>
+  );
   }
 
   if (isSubmitted) {
@@ -587,7 +587,7 @@ function App() {
 
             <button type="submit" className="mt-8 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
               Enviar
-            </button>
+                </button>
           </form>
         </div>
       </div>
